@@ -1,0 +1,144 @@
+import bokeh as Bokeh
+import bokeh.plotting as bkp
+from bokeh.models import Div
+from bokeh.layouts import column, row
+from bokeh.io import curdoc
+
+
+
+
+def prior_density_plot(variable,data, plottype='Seperate Plots'):
+    """
+    Method for producing the prior kde plot using arviz plot_density. This is done 2 ways: either will produce all     the plots onto one graph or will produe them seperately
+
+    The parameters are the data, plottype, either "Seperate Plots" or "Same Plots" 
+
+    Also takes the variable to view which will be chosen by the dropdown in the program. Probably shouldnt be          hardcoded with a default as this will change with each model.  *** Will change later ***
+    """
+    if plottype == 'Seperate Plots':
+        plots = []
+        for key, value in data.items():
+            kwg = dict(title=key)
+            curdoc().theme = 'dark_minimal'
+            plot = az.plot_density(
+                value,
+                group='prior', 
+                var_names=variable,
+                outline=False, 
+                backend='bokeh',
+                shade=.5, 
+                show=False,
+                backend_kwargs=kwg
+                )
+            """ ** Can't get the title to change with kwargs so workaround with html div ** """
+            plots.append(column(Div(text='<h2>'+key+'</h2>'),row(plot[0].tolist(), sizing_mode='scale_both')))
+        col = column(plots)
+    else:
+        curdoc().theme = 'dark_minimal'
+        plot = az.plot_density(
+            list(data.values()), 
+            group='prior', 
+            var_names=variable,
+            outline=False,  
+            backend='bokeh',
+            shade=.5, 
+            show=False, 
+            colors='cycle'
+            )
+        col = column(plot[0].tolist())
+    return col
+
+
+def posterior_density_plot(variable, data, plottype):
+    """
+    Basically the sama as the prior density plot but uses the posterior instead. Could have resused the same           method with an extra param but the panel.interact method tries to create features for parameter selection          which i dont want in this case
+
+    *** will try to find a workaround for this feature to reduce unnescesary code copying***
+    """
+    if plottype == 'Seperate Plots':
+        plots = []
+        for key,value in data.items():
+            curdoc().theme = 'dark_minimal'
+            kwg = dict(title=key)
+            plot = az.plot_density(
+                value, 
+                group='posterior', 
+                var_names=variable, 
+                backend='bokeh',
+                outline=False,
+                shade=.5, 
+                show=False,
+                backend_kwargs=kwg
+                )
+            plots.append(column(Div(text='<h2>'+key+'</h2>'),row(plot[0].tolist(), sizing_mode='scale_both')))
+        col = column(plots)
+    else:
+        curdoc().theme = 'dark_minimal'
+        plot = az.plot_density(
+            list(data.values()), 
+            group='posterior', 
+            var_names=variable, 
+            backend='bokeh',
+            shade=.5, 
+            show=False, 
+            colors='cycle',
+            outline=False, 
+            )
+        col = column(plot[0].tolist())
+    return col
+
+
+def prior_predictive_density_plot(self, variable, data):
+    plots = []
+    for key, value in data.items():
+        kwg = dict(title=key)
+        curdoc().theme = 'dark_minimal'
+        plot = az.plot_ppc(
+            value, 
+            group='prior', 
+            var_names=variable, 
+            backend='bokeh',
+            alpha=.5, 
+            show=False,
+            backend_kwargs=kwg
+            )
+        plots.append(column(Div(text='<h2>'+key+'</h2>'),row(plot[0].tolist(), sizing_mode='scale_both')))
+    col = column(plots)
+    return col
+
+def posterior_predictive_density_plot(variable, data):
+    plots = []
+    for key, value in data.items():
+        kwg = dict(title=key)
+        curdoc().theme = 'dark_minimal'
+        plot = az.plot_ppc(
+            value, 
+            group='posterior', 
+            var_names=variable, 
+            backend='bokeh',
+            alpha=.5, 
+            show=False,
+            backend_kwargs=kwg
+            )
+        plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
+    col = column(plots)
+    return col
+
+
+def sample_trace_plot(variable, data):
+    plots = []
+    for key, value in data.items():
+        kwg = dict(height=200,title=key)
+        curdoc().theme = 'dark_minimal'
+        plot = az.plot_trace(
+            value, 
+            var_names=variable, 
+            backend='bokeh', 
+            show=False,
+            backend_kwargs=kwg,
+            compact=True,
+            combined=True,
+            )
+        plots.append(column(Div(text='<h2>'+key+'</h2>'),row(plot[0].tolist(), sizing_mode='scale_both')))
+    col = column(plots)
+    return col
