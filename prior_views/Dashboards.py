@@ -1,10 +1,10 @@
 import param
 from Plots import prior_density_plot, posterior_density_plot
-from Models.DisasterModel import CreateModel
+from DisasterModel import CreateModel
+import panel as pn
 
-
-pm_data = DisasterModel.CreateModel()
-
+pm_data = CreateModel()
+data = {'Prior_1': pm_data, 'Prior_2': pm_data}
 prior_inputs = list(pm_data.prior.data_vars)
 posterior_inputs = list(pm_data.prior.data_vars)
 inputs_2 = ['Same Plot', 'Seperate Plots']
@@ -16,7 +16,7 @@ class PriorDashboard(param.Parameterized):
     
     @param.depends('variable', 'plot_type')
     def plot(self):
-        return p.prior_density_plot(variable=self.variable, data=models, plottype=self.plot_type)
+        return prior_density_plot(variable=self.variable, data=data, plottype=self.plot_type)
     
     def panel(self):
         return pn.Row(self.param, self.plot)
@@ -29,11 +29,13 @@ class PosteriorDashboard(param.Parameterized):
     
     @param.depends('variable', 'plot_type')
     def plot(self):
-        return posterior_density_plot(variable=self.variable, data=models, plottype=self.plot_type)
+        return posterior_density_plot(variable=self.variable, data=data, plottype=self.plot_type)
     
     def panel(self):
         return pn.Row(self.param, self.plot)
 
 
-dashboard = pn.Tab('Prior',(PriorDashboard(name='Prior_Dashboard')),('Posterior', (PosteriorDashboard(name='Posterior_Dashboard'))))
-pn.serve(dashboard.panel().servable())
+prior = PriorDashboard(name='Prior_Dashboard')
+posterior = PosteriorDashboard(name='Posterior_Dashboard')
+dashboard = pn.Tabs(   ('Prior',prior.panel().servable()) ,  ('Posterior', posterior.panel().servable())   )
+pn.serve(dashboard)

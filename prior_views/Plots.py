@@ -3,6 +3,7 @@ import bokeh.plotting as bkp
 from bokeh.models import Div
 from bokeh.layouts import column, row
 from bokeh.io import curdoc
+import arviz as az
 
 
 
