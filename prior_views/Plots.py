@@ -4,10 +4,25 @@ from bokeh.models import Div
 from bokeh.layouts import column, row
 from bokeh.io import curdoc
 import arviz as az
+from functools import lru_cache
+import functools
+from theano.misc.frozendict import frozendict
 
+def freezeargs(func):
+    """Transform mutable dictionnary
+    Into immutable
+    Useful to be compatible with cache
+    """
 
+    @functools.wraps(func)
+    def wrapped(*args, **kwargs):
+        args = tuple([frozendict(arg) if isinstance(arg, dict) else arg for arg in args])
+        kwargs = {k: frozendict(v) if isinstance(v, dict) else v for k, v in kwargs.items()}
+        return func(*args, **kwargs)
+    return wrapped
 
-
+@freezeargs
+@lru_cache(maxsize=32)
 def prior_density_plot(variable,data, plottype='Seperate Plots'):
     """
     Method for producing the prior kde plot using arviz plot_density. This is done 2 ways: either will produce all     the plots onto one graph or will produe them seperately
@@ -50,6 +65,8 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
     return col
 
 
+@freezeargs
+@lru_cache(maxsize=32)
 def posterior_density_plot(variable, data, plottype):
     """
     Basically the sama as the prior density plot but uses the posterior instead. Could have resused the same           method with an extra param but the panel.interact method tries to create features for parameter selection          which i dont want in this case
@@ -89,7 +106,7 @@ def posterior_density_plot(variable, data, plottype):
     return col
 
 
-def prior_predictive_density_plot(self, variable, data):
+def prior_predictive_density_plot(variable, data):
     plots = []
     for key, value in data.items():
         kwg = dict(title=key)
@@ -126,6 +143,8 @@ def posterior_predictive_density_plot(variable, data):
     return col
 
 
+@freezeargs
+@lru_cache(maxsize=32)
 def sample_trace_plot(variable, data):
     plots = []
     for key, value in data.items():
