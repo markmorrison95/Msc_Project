@@ -16,8 +16,8 @@ def create_app():
     dashboard
     return dashboard
 
-def create_prior_view(data):
-    prior = PriorDashboard(name='Prior_Dashboard', data=data)
+def create_prior_view(data, prior_views):
+    prior = PriorDashboard(data=data, name='Prior_Dashboard')
     return prior.panel().servable()
 
 
