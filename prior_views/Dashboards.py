@@ -6,13 +6,14 @@ from tornado import gen
 from bokeh.plotting import curdoc
 from prior_views.ModelConversion import convert_models
 
+# inputs_2 is the selection type for plots. Need to change name and spelling of Seperate.
 inputs_2 = ['Same Plot', 'Seperate Plots']
 
 """
-Have to set the variables with default selectors containing none as there is no way to initialise the classes with 
-the variables already the. None allows for the plots to be called although will initially create with all the variables.
-Computationally this is not ideal, especially for sets with large data, but will just slow down initial load time and not
-slow the actual UI down.
+Have to set the variables with default selectors containing None as there is no way to initialise the classes with 
+the variables already there for param selectors. None allows for the plots to be called although will initially create with all the variables.
+Computationally this is not ideal, especially for sets with large amounts of variables, but will just slow down initial load time and not
+slow the actual UI down, as when the UI loads it will be done with the variables selector.
 """
 default_selectors = [None, None, None]
 

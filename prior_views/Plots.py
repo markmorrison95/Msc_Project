@@ -44,10 +44,11 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
                 backend='bokeh',
                 shade=.5, 
                 show=False,
-                backend_kwargs=kwg
+                backend_kwargs=kwg,
                 )
-            """ ** Can't get the title to change with kwargs so workaround with html div ** """
-            plots.append(column(Div(text='<h2>'+key+'</h2>'),row(plot[0].tolist(), sizing_mode='scale_both')))
+            for p in plot[0]:
+                p.title.text = key+' '+p.title.text 
+            plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
         col = column(plots)
     else:
         curdoc().theme = 'dark_minimal'
@@ -59,7 +60,8 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
             backend='bokeh',
             shade=.5, 
             show=False, 
-            colors='cycle'
+            colors='cycle',
+            data_labels=list(data.keys()),
             )
         col = column(plot[0].tolist())
     return col
@@ -88,7 +90,9 @@ def posterior_density_plot(variable, data, plottype):
                 show=False,
                 backend_kwargs=kwg
                 )
-            plots.append(column(Div(text='<h2>'+key+'</h2>'),row(plot[0].tolist(), sizing_mode='scale_both')))
+            for p in plot[0]:
+                p.title.text = key+' '+p.title.text 
+            plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
         col = column(plots)
     else:
         curdoc().theme = 'dark_minimal'
@@ -100,7 +104,8 @@ def posterior_density_plot(variable, data, plottype):
             shade=.5, 
             show=False, 
             colors='cycle',
-            outline=False, 
+            outline=False,
+            data_labels=list(data.keys()),
             )
         col = column(plot[0].tolist())
     return col
@@ -120,7 +125,7 @@ def prior_predictive_density_plot(variable, data):
             show=False,
             backend_kwargs=kwg
             )
-        plots.append(column(Div(text='<h2>'+key+'</h2>'),row(plot[0].tolist(), sizing_mode='scale_both')))
+        plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
     col = column(plots)
     return col
 
@@ -138,6 +143,8 @@ def posterior_predictive_density_plot(variable, data):
             show=False,
             backend_kwargs=kwg
             )
+        for p in plot[0]:
+            p.title.text = key+' '+p.title.text 
         plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
     col = column(plots)
     return col
@@ -159,6 +166,8 @@ def sample_trace_plot(variable, data):
             compact=True,
             combined=True,
             )
-        plots.append(column(Div(text='<h2>'+key+'</h2>'),row(plot[0].tolist(), sizing_mode='scale_both')))
+        for p in plot[0]:
+            p.title.text = key+' '+p.title.text 
+        plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
     col = column(plots)
     return col
