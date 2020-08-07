@@ -18,6 +18,7 @@ def create_app(models={}):
     posterior_vars = list(list(models.values())[0].posterior.data_vars)
     prior = PriorDashboard(name='Prior_Dashboard', data=models)
     prior.param.variable.objects = prior_vars
+    prior.param.variable.default = prior_vars[0]
     # prior_predictive = PriorPredictiveDashboard(name='Prior_Predictive_Dashboard')
     posterior = PosteriorDashboard(name='Posterior_Dashboard', data=models)
     posterior.param.variable.objects = posterior_vars

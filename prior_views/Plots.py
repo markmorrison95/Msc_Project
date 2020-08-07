@@ -1,8 +1,7 @@
 import bokeh as Bokeh
 import bokeh.plotting as bkp
-from bokeh.models import Div
+from bokeh.models import Legend
 from bokeh.layouts import column, row
-from bokeh.io import curdoc
 import arviz as az
 from functools import lru_cache
 import functools
@@ -34,8 +33,6 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
     if plottype == 'Seperate Plots':
         plots = []
         for key, value in data.items():
-            kwg = dict(title=key)
-            curdoc().theme = 'dark_minimal'
             plot = az.plot_density(
                 value,
                 group='prior', 
@@ -44,14 +41,13 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
                 backend='bokeh',
                 shade=.5, 
                 show=False,
-                backend_kwargs=kwg,
                 )
             for p in plot[0]:
                 p.title.text = key+' '+p.title.text 
             plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
         col = column(plots)
     else:
-        curdoc().theme = 'dark_minimal'
+        kwg = dict(height=350, width=500,toolbar_location='right')
         plot = az.plot_density(
             list(data.values()), 
             group='prior', 
@@ -62,7 +58,13 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
             show=False, 
             colors='cycle',
             data_labels=list(data.keys()),
+            backend_kwargs=kwg,
             )
+        for p in plot[0]:
+            legend = p.legend[0]
+            legend.location = (10,-10)
+            legend.orientation = "vertical"
+            p.add_layout(legend, place='right')
         col = column(plot[0].tolist())
     return col
 
@@ -78,8 +80,6 @@ def posterior_density_plot(variable, data, plottype):
     if plottype == 'Seperate Plots':
         plots = []
         for key,value in data.items():
-            curdoc().theme = 'dark_minimal'
-            kwg = dict(title=key)
             plot = az.plot_density(
                 value, 
                 group='posterior', 
@@ -88,14 +88,13 @@ def posterior_density_plot(variable, data, plottype):
                 outline=False,
                 shade=.5, 
                 show=False,
-                backend_kwargs=kwg
                 )
             for p in plot[0]:
                 p.title.text = key+' '+p.title.text 
             plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
         col = column(plots)
     else:
-        curdoc().theme = 'dark_minimal'
+        kwg = dict(height=350, width=500,toolbar_location='right')
         plot = az.plot_density(
             list(data.values()), 
             group='posterior', 
@@ -106,7 +105,13 @@ def posterior_density_plot(variable, data, plottype):
             colors='cycle',
             outline=False,
             data_labels=list(data.keys()),
+            backend_kwargs=kwg,
             )
+        for p in plot[0]:
+            legend = p.legend[0]
+            legend.location = (10,-10)
+            legend.orientation = "vertical"
+            p.add_layout(legend, place='right')
         col = column(plot[0].tolist())
     return col
 
@@ -115,7 +120,6 @@ def prior_predictive_density_plot(variable, data):
     plots = []
     for key, value in data.items():
         kwg = dict(title=key)
-        curdoc().theme = 'dark_minimal'
         plot = az.plot_ppc(
             value, 
             group='prior', 
@@ -133,7 +137,6 @@ def posterior_predictive_density_plot(variable, data):
     plots = []
     for key, value in data.items():
         kwg = dict(title=key)
-        curdoc().theme = 'dark_minimal'
         plot = az.plot_ppc(
             value, 
             group='posterior', 
@@ -156,7 +159,6 @@ def sample_trace_plot(variable, data):
     plots = []
     for key, value in data.items():
         kwg = dict(height=200,title=key)
-        curdoc().theme = 'dark_minimal'
         plot = az.plot_trace(
             value, 
             var_names=variable, 

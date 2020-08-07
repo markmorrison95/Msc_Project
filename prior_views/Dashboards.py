@@ -29,7 +29,7 @@ class PriorDashboard(param.Parameterized):
         return prior_density_plot(variable=self.variable, data=self.data, plottype=self.plot_type)
 
     def panel(self):
-        return pn.Row(self.param, self.plot)
+        return pn.Row(self.param, self.plot, sizing_mode='scale_both')
 
 
 class PriorPredictiveDashboard(param.Parameterized):
@@ -42,7 +42,7 @@ class PriorPredictiveDashboard(param.Parameterized):
         return prior_predictive_density_plot(variable=self.variable, data=self.data)
 
     def panel(self):
-        return pn.Row(self.param, self.plot)
+        return pn.Row(self.param, self.plot, sizing_mode='scale_both')
 
 
 class PosteriorDashboard(param.Parameterized):
@@ -55,7 +55,7 @@ class PosteriorDashboard(param.Parameterized):
         return posterior_density_plot(variable=self.variable, data=self.data, plottype=self.plot_type)
 
     def panel(self):
-        return pn.Row(self.param, self.plot)
+        return pn.Row(self.param, self.plot, sizing_mode='scale_both')
 
 
 class posterior_predictive_Dashboard(param.Parameterized):
@@ -67,7 +67,7 @@ class posterior_predictive_Dashboard(param.Parameterized):
         return posterior_predictive_density_plot(variable=self.variable, data=self.data)
 
     def panel(self):
-        return pn.Row(self.param, self.plot)
+        return pn.Row(self.param, self.plot, sizing_mode='scale_both')
 
 
 class sample_trace_dashboard(param.Parameterized):
@@ -79,4 +79,4 @@ class sample_trace_dashboard(param.Parameterized):
         return sample_trace_plot(variable=self.variable, data=self.data)
 
     def panel(self):
-        return pn.Row(self.param, self.plot)
+        return pn.Row(self.param, self.plot, sizing_mode='scale_both')
