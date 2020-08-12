@@ -1,0 +1,13 @@
+import prior_views.ModelConversion as mc
+
+fractions = [.95, .9, .8]
+
+class model:
+    def __init__(self, model, data, model_kwargs:dict):
+        self.model_arviz_data = mc.convert_full_model(model(data, **model_kwargs))
+        self.posteriors = {}
+        self.posteriors[1] = self.model_arviz_data.posterior
+        for f in fractions:
+            p = mc.convert_posterior_model(model(data=mc.data_reduce_with_nan(data, f), **model_kwargs))
+            self.posteriors[f] = p.posterior
+        

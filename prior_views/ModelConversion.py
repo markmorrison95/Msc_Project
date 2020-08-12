@@ -4,23 +4,27 @@ import random
 import numpy as np
 import pandas as pd
 
-def convert_models(models=[]):
-    model_data = {}
-    i = 1
-    for m in models:
-        with m:
-            trace = pm.sample(1000)
-            prior = pm.sample_prior_predictive(1000)
-            posterior = pm.sample_posterior_predictive(trace)
-            data = az.from_pymc3(
-                        trace=trace,
-                        prior=prior,
-                        posterior_predictive=posterior,
-                    )
-            name = "prior_" + str(i) 
-            i+=1
-            model_data.update({name :data})
-    return model_data
+def convert_full_model(model):
+    with model:
+        trace = pm.sample()
+        prior = pm.sample_prior_predictive()
+        posterior = pm.sample_posterior_predictive(trace)
+        data = az.from_pymc3(
+                    trace=trace,
+                    prior=prior,
+                    posterior_predictive=posterior,
+                )
+    return data
+
+def convert_posterior_model(model):
+    with model:
+        trace = pm.sample()
+        posterior = pm.sample_posterior_predictive(trace)
+        data = az.from_pymc3(
+                    trace=trace,
+                    posterior_predictive=posterior,
+                )
+    return data
 
 
 def data_reduce_with_nan(data, fraction):
@@ -39,6 +43,7 @@ def data_reduce_with_nan(data, fraction):
     else:
         raise TypeError("Only Pandas DataFrame or Series allowed")
 
+
 def reduce_data_remove(data, fraction):
     """
     Reduces data by selecting random rows in the DataFrame and removing them entirely.
@@ -54,3 +59,23 @@ def reduce_data_remove(data, fraction):
         return data
     else:
         raise TypeError("Only Pandas DataFrame or Series allowed")
+
+
+
+# def convert_models(models=[]):
+#     model_data = {}
+#     i = 1
+#     for m in models:
+#         with m:
+#             trace = pm.sample(1000)
+#             prior = pm.sample_prior_predictive(1000)
+#             posterior = pm.sample_posterior_predictive(trace)
+#             data = az.from_pymc3(
+#                         trace=trace,
+#                         prior=prior,
+#                         posterior_predictive=posterior,
+#                     )
+#             name = "prior_" + str(i) 
+#             i+=1
+#             model_data.update({name :data})
+#     return model_data
