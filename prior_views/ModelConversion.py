@@ -4,11 +4,16 @@ import random
 import numpy as np
 import pandas as pd
 
+import logging
+
+logger = logging.getLogger('pymc3')
+logger.setLevel(logging.ERROR)
+
 def convert_full_model(model):
     with model:
-        trace = pm.sample()
+        trace = pm.sample(progressbar=False)
         prior = pm.sample_prior_predictive()
-        posterior = pm.sample_posterior_predictive(trace)
+        posterior = pm.sample_posterior_predictive(trace,progressbar=False)
         data = az.from_pymc3(
                     trace=trace,
                     prior=prior,
@@ -18,8 +23,8 @@ def convert_full_model(model):
 
 def convert_posterior_model(model):
     with model:
-        trace = pm.sample()
-        posterior = pm.sample_posterior_predictive(trace)
+        trace = pm.sample(progressbar=False)
+        posterior = pm.sample_posterior_predictive(trace,progressbar=False)
         data = az.from_pymc3(
                     trace=trace,
                     posterior_predictive=posterior,
