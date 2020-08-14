@@ -1,4 +1,5 @@
 from prior_views.model import model
+import webbrowser
 
 class model_container:
     def __init__(self, model:model):
@@ -7,7 +8,7 @@ class model_container:
         self.model_data = model.original_data
 
     def add_model(self, prior_args:dict):
-        self.models_dict['new_model'] = model(model=original_model.model_function, data=model_data, model_kwargs=prior_args)
+        self.models_dict['new_model'] = model(model=self.original_model.model_function, data=self.model_data, model_kwargs=prior_args)
 
     
     def arviz_data_list(self):

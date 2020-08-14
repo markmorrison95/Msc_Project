@@ -6,6 +6,7 @@ import nest_asyncio
 import functools
 import webbrowser
 from prior_views.models_container import model_container
+from threading import Thread
 
 class CreateApp:
     def __init__(self, controls, models:model_container):
@@ -52,8 +53,16 @@ class CreateApp:
         for setting in prior_settings:
             if setting.name != 'Add Prior Setting':
                 new_config[setting.name]=setting.value
-        self.controls.add_new_model_config(new_config)
+        thread = Thread(target = self.controls.add_new_model_config, args = (new_config,))
+        thread.start()
         """ need to add method call for adding model config"""
+    
+    def new_model_added(self):
+        """
+        Will be called after a new model has been added
+        Should trigger a message saying its added or remove some sort of
+        loading symbol. Then refresh the display so that the new model shows up
+        """
         
 
 
