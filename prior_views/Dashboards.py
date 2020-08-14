@@ -6,7 +6,7 @@ from tornado import gen
 from bokeh.plotting import curdoc
 
 # inputs_2 is the selection type for plots. Need to change name and spelling of Seperate.
-inputs_2 = ['Same Plot', 'Seperate Plots']
+inputs_2 = ['Seperate Plots','Same Plot' ]
 
 """
 Have to set the variables with default selectors containing None as there is no way to initialise the classes with 

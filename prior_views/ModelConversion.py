@@ -6,6 +6,7 @@ import pandas as pd
 
 import logging
 
+# removes pymc3 sampling output apart from errors
 logger = logging.getLogger('pymc3')
 logger.setLevel(logging.ERROR)
 

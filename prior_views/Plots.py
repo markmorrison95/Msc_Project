@@ -20,8 +20,8 @@ def freezeargs(func):
     return wrapped
 
 
-@freezeargs
-@lru_cache(maxsize=32)
+# @freezeargs
+# @lru_cache(maxsize=32)
 def prior_density_plot(variable,data, plottype='Seperate Plots'):
     """
     Method for producing the prior kde plot using arviz plot_density. This is done 2 ways: either will produce all     the plots onto one graph or will produe them seperately
@@ -34,7 +34,7 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
         plots = []
         for key, value in data.items():
             plot = az.plot_density(
-                value,
+                value.model_arviz_data,
                 group='prior', 
                 var_names=variable,
                 outline=False, 
@@ -49,7 +49,7 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
     else:
         kwg = dict(height=350, width=500,toolbar_location='right')
         plot = az.plot_density(
-            list(data.values()), 
+            data.arviz_data_list, 
             group='prior', 
             var_names=variable,
             outline=False,  
@@ -81,7 +81,7 @@ def posterior_density_plot(variable, data, plottype):
         plots = []
         for key,value in data.items():
             plot = az.plot_density(
-                value, 
+                value.model_arviz_data, 
                 group='posterior', 
                 var_names=variable, 
                 backend='bokeh',
@@ -96,7 +96,7 @@ def posterior_density_plot(variable, data, plottype):
     else:
         kwg = dict(height=350, width=500,toolbar_location='right')
         plot = az.plot_density(
-            list(data.values()), 
+            data.arviz_data_list, 
             group='posterior', 
             var_names=variable, 
             backend='bokeh',
@@ -121,7 +121,7 @@ def prior_predictive_density_plot(variable, data):
     for key, value in data.items():
         kwg = dict(title=key)
         plot = az.plot_ppc(
-            value, 
+            value.model_arviz_data, 
             group='prior', 
             var_names=variable, 
             backend='bokeh',
@@ -138,7 +138,7 @@ def posterior_predictive_density_plot(variable, data):
     for key, value in data.items():
         kwg = dict(title=key)
         plot = az.plot_ppc(
-            value, 
+            value.model_arviz_data, 
             group='posterior', 
             var_names=variable, 
             backend='bokeh',
@@ -153,14 +153,14 @@ def posterior_predictive_density_plot(variable, data):
     return col
 
 
-@freezeargs
-@lru_cache(maxsize=32)
+# @freezeargs
+# @lru_cache(maxsize=32)
 def sample_trace_plot(variable, data):
     plots = []
     for key, value in data.items():
         kwg = dict(height=200,title=key)
         plot = az.plot_trace(
-            value, 
+            value.model_arviz_data, 
             var_names=variable, 
             backend='bokeh', 
             show=False,
