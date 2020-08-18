@@ -8,6 +8,12 @@ import webbrowser
 from prior_views.models_container import model_container
 from threading import Thread
 
+def dict_to_string(dic:dict):
+    s = ''
+    for key, value in dic.items():
+        s += (key + ' = ' + str(value) + '<br/>')
+    return s
+
 class CreateApp:
     def __init__(self, controls, models:model_container):
         self.controls = controls
@@ -29,8 +35,8 @@ class CreateApp:
         prior.param.variable.objects = prior_vars
         prior.param.variable.default = prior_vars[0]
         # prior_predictive = PriorPredictiveDashboard(name='Prior_Predictive_Dashboard')
-        # posterior = PosteriorDashboard(name='Posterior_Dashboard', data=models)
-        # posterior.param.variable.objects = posterior_vars
+        posterior = PosteriorDashboard(name='Posterior_Dashboard', data=self.models.models_dict)
+        posterior.param.variable.objects = posterior_vars
         # posterior_predictive = posterior_predictive_Dashboard(name= 'posterior_predictive_dashboard')
         sample_trace = sample_trace_dashboard(
             name='sample_trace_dashboard', data=self.models.models_dict)
@@ -38,12 +44,15 @@ class CreateApp:
         dashboard = pn.Tabs(
             ('Prior', prior.panel().servable()),
             # ('Prior_Predictive', prior_predictive.panel().servable()),
-            # ('Posterior', posterior.panel().servable()),
+            ('Posterior', posterior.panel().servable()),
             # ('Posterior_Predictive', posterior_predictive.panel().servable()),
             ('Sample_Trace', sample_trace.panel().servable()),
         )
         m_kwars = models.models_dict['Original'].model_kwargs
-        r = pn.Row(self.model_selector_sliders(m_kwars), dashboard)
+        prior_sliders = self.model_selector_sliders(m_kwars)
+        prior_tabs = self.prior_descrip_tabs()
+        prior_tabs.append(('Add Prior Config',prior_sliders))
+        r = pn.Row(prior_tabs, dashboard)
         return r
 
     def add_model(self, event, prior_settings):
@@ -55,6 +64,7 @@ class CreateApp:
                 new_config[setting.name]=setting.value
         thread = Thread(target = self.controls.add_new_model_config, args = (new_config,))
         thread.start()
+        webbrowser.open('https://www.youtube.com')
         """ need to add method call for adding model config"""
     
     def new_model_added(self):
@@ -70,8 +80,8 @@ class CreateApp:
         sliders = pn.Column()
         for key, val in prior_args.items():
             upper_bound = val*1.5
-            lowe_bound = val*.5
-            sliders.append(pn.widgets.FloatSlider(name=key, start=lowe_bound, end=upper_bound, value=val))
+            lower_bound = val*.5
+            sliders.append(pn.widgets.FloatSlider(name=key, start=lower_bound, end=upper_bound, value=val))
 
         button = pn.widgets.Button(name='Add Prior Setting', button_type='primary')
         button.on_click(functools.partial(self.add_model, prior_settings=sliders))
@@ -79,12 +89,23 @@ class CreateApp:
         sliders.append(button)
         return sliders
 
+    def prior_descrip_tabs(self):
+        params={'tabs_location':'left',
+        }
+        tabs = pn.Tabs(**params)
+        for key, val in self.models.models_dict.items():
+             text = dict_to_string(val.model_kwargs)
+             tabs.append((key, pn.pane.Markdown('<p>' + text + '</p>')))
+        return tabs
+
+
 
 
 
     def prior_checking_tool(self):
         loop = IOLoop().current()
-        server = pn.serve(self.create_app(self.models), show=False, loop=loop, start=False)
+        args = {'optional argument' : '--dev'}
+        server = pn.serve(self.create_app(self.models), show=False, loop=loop, start=False, **args)
         # nest_asyncio required because if opening in jupyter notebooks, IOloop is already in use
         nest_asyncio.apply()
         return server.start()

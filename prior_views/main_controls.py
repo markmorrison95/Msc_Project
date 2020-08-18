@@ -10,5 +10,5 @@ class Main_controls:
 
 
     def add_new_model_config(self, prior_args:dict):
-        models.add_model(prior_args=prior_args)
-        self.app.new_model_added()
+        self.models.add_model(prior_args=prior_args)
+        # self.app.new_model_added()

@@ -71,7 +71,7 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
 
 # @freezeargs
 # @lru_cache(maxsize=32)
-def posterior_density_plot(variable, data, plottype):
+def posterior_density_plot(variable, data, percent, plottype):
     """
     Basically the sama as the prior density plot but uses the posterior instead. Could have resused the same           method with an extra param but the panel.interact method tries to create features for parameter selection          which i dont want in this case
 
@@ -81,7 +81,7 @@ def posterior_density_plot(variable, data, plottype):
         plots = []
         for key,value in data.items():
             plot = az.plot_density(
-                value.model_arviz_data, 
+                value.posteriors[percent],
                 group='posterior', 
                 var_names=variable, 
                 backend='bokeh',

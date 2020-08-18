@@ -9,7 +9,7 @@ class model_container:
 
     def add_model(self, prior_args:dict):
         self.models_dict['new_model'] = model(model=self.original_model.model_function, data=self.model_data, model_kwargs=prior_args)
-
+        webbrowser.open('https://www.youtube.com')
     
     def arviz_data_list(self):
         data = []
