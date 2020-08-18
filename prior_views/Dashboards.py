@@ -4,10 +4,9 @@ from prior_views.DisasterModel import CreateModel
 import panel as pn
 from tornado import gen
 from bokeh.plotting import curdoc
-from prior_views.ModelConversion import convert_models
 
 # inputs_2 is the selection type for plots. Need to change name and spelling of Seperate.
-inputs_2 = ['Same Plot', 'Seperate Plots']
+inputs_2 = ['Seperate Plots','Same Plot' ]
 
 """
 Have to set the variables with default selectors containing None as there is no way to initialise the classes with 
@@ -48,11 +47,13 @@ class PriorPredictiveDashboard(param.Parameterized):
 class PosteriorDashboard(param.Parameterized):
     data = param.Dict(precedence=-1)
     variable = param.Selector(default_selectors)
-    plot_type = param.Selector(inputs_2, default=inputs_2[0])
+    plot_type = param.Selector(inputs_2, default=inputs_2[0], doc='Type of Plot:')
+    percentage = param.Number(default=100, bounds=(80,100), step=5, doc='Percentage of Data:')
 
-    @param.depends('variable', 'plot_type', 'data')
+    @param.depends('variable', 'plot_type', 'data', 'percentage')
     def plot(self):
-        return posterior_density_plot(variable=self.variable, data=self.data, plottype=self.plot_type)
+        return posterior_density_plot(variable=self.variable, data=list(self.data.values())[0].posteriors[self.percentage], plottype=self.plot_type)
+
 
     def panel(self):
         return pn.Row(self.param, self.plot, sizing_mode='scale_both')
