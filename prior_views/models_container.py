@@ -4,12 +4,18 @@ import webbrowser
 class model_container:
     def __init__(self, model:model):
         self.original_model = model
-        self.models_dict = {'Original':model}
+        self.models_dict = {model.name:model}
         self.model_data = model.original_data
 
-    def add_model(self, prior_args:dict):
-        self.models_dict['new_model'] = model(model=self.original_model.model_function, data=self.model_data, model_kwargs=prior_args)
-        webbrowser.open('https://www.youtube.com')
+    def add_model(self, prior_args:dict, name):
+        new_model = model(
+            model=self.original_model.model_function, 
+            data=self.model_data, 
+            model_kwargs=prior_args,
+            name=name
+            )
+        self.models_dict[name] = new_model
+        return new_model
     
     def arviz_data_list(self):
         data = []

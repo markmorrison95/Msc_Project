@@ -19,9 +19,23 @@ def freezeargs(func):
         return func(*args, **kwargs)
     return wrapped
 
+@freezeargs
+@lru_cache(maxsize=32)
+def priors_same_plot_list(model_dict):
+    data_list = []
+    for model in model_dict.values():
+        data_list.append(model.model_arviz_data)
+    return data_list
 
-# @freezeargs
-# @lru_cache(maxsize=32)
+@freezeargs
+@lru_cache(maxsize=32)
+def posteriors_same_plot_list(model_dict, percent):
+    data_list = []
+    for model in model_dict.values():
+        data_list.append(model.posteriors[percent])
+    return data_list
+
+
 def prior_density_plot(variable,data, plottype='Seperate Plots'):
     """
     Method for producing the prior kde plot using arviz plot_density. This is done 2 ways: either will produce all     the plots onto one graph or will produe them seperately
@@ -49,7 +63,7 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
     else:
         kwg = dict(height=350, width=500,toolbar_location='right')
         plot = az.plot_density(
-            data.arviz_data_list, 
+            priors_same_plot_list(data), 
             group='prior', 
             var_names=variable,
             outline=False,  
@@ -69,8 +83,7 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
     return col
 
 
-# @freezeargs
-# @lru_cache(maxsize=32)
+
 def posterior_density_plot(variable, data, percent, plottype):
     """
     Basically the sama as the prior density plot but uses the posterior instead. Could have resused the same           method with an extra param but the panel.interact method tries to create features for parameter selection          which i dont want in this case
@@ -96,7 +109,7 @@ def posterior_density_plot(variable, data, percent, plottype):
     else:
         kwg = dict(height=350, width=500,toolbar_location='right')
         plot = az.plot_density(
-            data.arviz_data_list, 
+            posteriors_same_plot_list(data, percent), 
             group='posterior', 
             var_names=variable, 
             backend='bokeh',
@@ -153,8 +166,6 @@ def posterior_predictive_density_plot(variable, data):
     return col
 
 
-# @freezeargs
-# @lru_cache(maxsize=32)
 def sample_trace_plot(variable, data):
     plots = []
     for key, value in data.items():

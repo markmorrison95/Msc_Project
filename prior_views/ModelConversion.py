@@ -42,6 +42,7 @@ def data_reduce_with_nan(data, fraction):
     Throws type error if pandas dataframe of dataseries not used. 
     """
     if isinstance(data, pd.DataFrame) or isinstance(data, pd.Series):
+        data = data.copy(deep=True)
         size = len(data)
         to_remove = int(size - (size*fraction))
         data.loc[list(data.loc[random.sample(list(data.index), to_remove)].index)] = np.nan
@@ -59,6 +60,7 @@ def reduce_data_remove(data, fraction):
     Throws type error if pandas dataframe of dataseries not used. 
     """
     if isinstance(data, pd.DataFrame or isinstance(data, pd.Series)):
+        data = data.copy(deep=True)
         size = len(data)
         to_remove = int(size - (size*fraction))
         data.drop(list(data.loc[random.sample(list(data.index), to_remove)].index))
