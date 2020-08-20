@@ -7,6 +7,7 @@ import functools
 import webbrowser
 from prior_views.models_container import model_container
 from threading import Thread
+from webcolors import hex_to_rgb
 
 
 def dict_to_string(dic: dict):
@@ -22,7 +23,7 @@ class CreateApp:
         self.models = models
         """
         Pulls together the components required to create each tab
-        Initally pulls the variable names out of the data. In order to set the variable names for each dashboard
+        Initally pulls the variable names out of the original_model. In order to set the variable names for each dashboard
         the dashboard needs to be initialise and then have the param for variable edited with the values. This is the
         only way i could find to dynamically update with the variables as no way to pass to the class in a way that
         param.Paramatized likes
@@ -70,7 +71,14 @@ class CreateApp:
         self.prior_sliders = self.model_selector_sliders(m_kwars)
         self.prior_tabs = self.prior_descrip_tabs()
         self.prior_tabs.append(('Add Prior Config', self.prior_sliders))
-        self.r = pn.Row(self.prior_tabs, dashboard)
+        model_config_column = pn.Column(pn.pane.Markdown('<h2>Model Configurations:<h2>'), self.prior_tabs)
+        model_plots_column = pn.Column(pn.pane.Markdown('<h2>Model Plots:<h2>'), dashboard)
+        self.r = pn.Row(model_config_column, model_plots_column)
+
+
+
+
+
 
     def add_model(self, event, prior_settings):
         """ config from sliders being extracted into dict, ready to be passed as 
@@ -99,6 +107,10 @@ class CreateApp:
         thread.start()
         """ need to add method call for adding model config"""
 
+
+
+
+
     def new_model_added(self, new_prior_model):
         """
         Will be called after a new model has been added
@@ -111,18 +123,25 @@ class CreateApp:
         self.prior_tabs.insert(
             (len(self.prior_tabs)-1),
             (new_prior_model.name, self.prior_config_view(
-                original_prior_args=self.models.original_model.model_kwargs,
-                new_prior_args=new_prior_model.model_kwargs,
-                new_model_name=new_prior_model.name
+                                                original_prior_args=self.models.original_model.model_kwargs,
+                                                new_prior_args=new_prior_model.model_kwargs,
+                                                new_model_name=new_prior_model.name,
+                                                color=new_prior_model.color
             )
             )
         )
 
-    def prior_config_view(self, original_prior_args, new_prior_args, new_model_name):
+
+
+
+    def prior_config_view(self, original_prior_args, new_prior_args, new_model_name, color):
         sliders = pn.Column()
         sliders.append(pn.widgets.StaticText(
-            name='Model Config Name', value=new_model_name))
-        for (key, val), (key2, val2) in original_prior_args.items(), new_prior_args.items():
+                                name='Model Config Name', 
+                                value=new_model_name
+                                )
+                            )
+        for (key, val), (key2, val2) in zip(original_prior_args.items(), new_prior_args.items()):
             upper_bound = val*1.5
             lower_bound = val*.5
             sliders.append(
@@ -134,7 +153,11 @@ class CreateApp:
                     disabled=True,
                 )
             )
+        sliders.append(pn.widgets.ColorPicker(value=color, disabled=True))
         return sliders
+
+
+
 
     def model_selector_sliders(self, prior_args: dict):
         sliders = pn.Column()
@@ -143,8 +166,15 @@ class CreateApp:
         for key, val in prior_args.items():
             upper_bound = val*1.5
             lower_bound = val*.5
-            sliders.append(pn.widgets.FloatSlider(
-                name=key, start=lower_bound, end=upper_bound, value=val))
+            sliders.append(
+                pn.widgets.FloatSlider(
+                                    name=key, 
+                                    start=lower_bound, 
+                                    end=upper_bound, 
+                                    value=val,
+                                    step=.01,
+                                    )
+                            )
 
         button = pn.widgets.Button(
             name='Add Prior Setting', button_type='primary')
@@ -153,6 +183,10 @@ class CreateApp:
         # button.on_click(add_model)
         sliders.append(button)
         return sliders
+
+
+
+
 
     def prior_descrip_tabs(self):
         params = {'tabs_location': 'left',
@@ -165,10 +199,16 @@ class CreateApp:
                     original_prior_args=val.model_kwargs,
                     new_prior_args=val.model_kwargs,
                     new_model_name=key,
+                    color=val.color,
                 )
                 )
             )
         return tabs
+
+
+
+
+
 
     def prior_checking_tool(self):
         loop = IOLoop().current()

@@ -29,7 +29,7 @@ class model:
         return list(self.model_arviz_data.prior_predictive.data_vars)
 
     def posterior_variables(self):
-        return list(self.model_arviz_data.prior.data_vars)
+        return list(self.model_arviz_data.posterior.data_vars)
 
     def posterior_predictive_variables(self):
         return list(self.model_arviz_data.posterior_predictive.data_vars)
