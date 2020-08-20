@@ -45,14 +45,14 @@ def color_pool_gen(model_dict):
 
 def prior_density_plot(variable,data, plottype='Seperate Plots'):
     """
-    Method for producing the prior kde plot using arviz plot_density. This is done 2 ways: either will produce all     the plots onto one graph or will produe them seperately
-
+    Method for producing the prior kde plot using arviz plot_density. 
+    This is done 2 ways: either will produce all the plots onto one graph or will produe them seperately
     The parameters are the data, plottype, either "Seperate Plots" or "Same Plots" 
-
-    Also takes the variable to view which will be chosen by the dropdown in the program. Probably shouldnt be          hardcoded with a default as this will change with each model.  *** Will change later ***
+    Also takes the variable to view which will be chosen by the dropdown in the program. 
     """
     if plottype == 'Seperate Plots':
         plots = []
+        kwg = dict(height=250, width=550)
         for key, value in data.items():
             plot = az.plot_density(
                 value.model_arviz_data,
@@ -63,6 +63,7 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
                 shade=.5, 
                 show=False,
                 colors=value.color,
+                backend_kwargs=kwg
                 )
             for p in plot[0]:
                 p.title.text = key+' '+p.title.text 
@@ -70,7 +71,7 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
             plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
         col = column(plots)
     else:
-        kwg = dict(height=350, width=500,toolbar_location='right')
+        kwg = dict(height=450, width=650,toolbar_location='right')
         plot = az.plot_density(
             priors_same_plot_list(data), 
             group='prior', 
@@ -95,12 +96,15 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
 
 def posterior_density_plot(variable, data, percent, plottype):
     """
-    Basically the sama as the prior density plot but uses the posterior instead. Could have resused the same           method with an extra param but the panel.interact method tries to create features for parameter selection          which i dont want in this case
-
-    *** will try to find a workaround for this feature to reduce unnescesary code copying***
+    Method for producing the posterior kde plot using arviz plot_density. 
+    This is done 2 ways: either will produce all the plots onto one graph or will produe them seperately
+    The parameters are the data : dictionary of model objects, plottype, either "Seperate Plots" or "Same Plots" 
+    Also takes the variable to view which will be chosen by the dropdown in the program. Requires a percentage which translates
+    to a percentage of data used. This corresponds to the values set in the model objects
     """
     if plottype == 'Seperate Plots':
         plots = []
+        kwg = dict(height=250, width=550)
         for key,value in data.items():
             plot = az.plot_density(
                 value.posteriors[percent],
@@ -111,6 +115,7 @@ def posterior_density_plot(variable, data, percent, plottype):
                 shade=.5, 
                 show=False,
                 colors=value.color,
+                backend_kwargs=kwg,
                 )
             for p in plot[0]:
                 p.title.text = key+' '+p.title.text 
@@ -118,7 +123,7 @@ def posterior_density_plot(variable, data, percent, plottype):
             plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
         col = column(plots)
     else:
-        kwg = dict(height=350, width=500,toolbar_location='right')
+        kwg = dict(height=450, width=650,toolbar_location='right')
         plot = az.plot_density(
             posteriors_same_plot_list(data, percent), 
             group='posterior', 
@@ -143,7 +148,7 @@ def posterior_density_plot(variable, data, percent, plottype):
 def prior_predictive_density_plot(variable, data):
     plots = []
     for key, value in data.items():
-        kwg = dict(title=key)
+        kwg = dict(title=key, height=350, width=500)
         plot = az.plot_ppc(
             value.model_arviz_data, 
             group='prior', 
@@ -161,7 +166,7 @@ def prior_predictive_density_plot(variable, data):
 def posterior_predictive_density_plot(variable, data):
     plots = []
     for key, value in data.items():
-        kwg = dict(title=key)
+        kwg = dict(title=key, height=350, width=500)
         plot = az.plot_ppc(
             value.model_arviz_data, 
             group='posterior', 

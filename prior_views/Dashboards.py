@@ -34,7 +34,6 @@ class PriorDashboard(param.Parameterized):
 class PriorPredictiveDashboard(param.Parameterized):
     data = param.Dict(precedence=-1)
     variable = param.Selector(default_selectors)
-    plot_type = param.Selector(inputs_2, default=inputs_2[0])
 
     @param.depends('variable', 'data')
     def plot(self):
