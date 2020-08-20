@@ -7,6 +7,7 @@ from functools import lru_cache
 import functools
 from theano.misc.frozendict import frozendict
 
+
 def freezeargs(func):
     """Transform mutable dictionnary
     Into immutable
@@ -19,9 +20,29 @@ def freezeargs(func):
         return func(*args, **kwargs)
     return wrapped
 
+@freezeargs
+@lru_cache(maxsize=32)
+def priors_same_plot_list(model_dict):
+    data_list = []
+    for model in model_dict.values():
+        data_list.append(model.model_arviz_data)
+    return data_list
 
-# @freezeargs
-# @lru_cache(maxsize=32)
+@freezeargs
+@lru_cache(maxsize=32)
+def posteriors_same_plot_list(model_dict, percent):
+    data_list = []
+    for model in model_dict.values():
+        data_list.append(model.posteriors[percent])
+    return data_list
+
+def color_pool_gen(model_dict):
+    colors = []
+    for model in model_dict.values():
+        colors.append(model.color)
+    return colors
+
+
 def prior_density_plot(variable,data, plottype='Seperate Plots'):
     """
     Method for producing the prior kde plot using arviz plot_density. This is done 2 ways: either will produce all     the plots onto one graph or will produe them seperately
@@ -41,22 +62,24 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
                 backend='bokeh',
                 shade=.5, 
                 show=False,
+                colors=value.color,
                 )
             for p in plot[0]:
                 p.title.text = key+' '+p.title.text 
+                p.legend.visible = False
             plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
         col = column(plots)
     else:
         kwg = dict(height=350, width=500,toolbar_location='right')
         plot = az.plot_density(
-            data.arviz_data_list, 
+            priors_same_plot_list(data), 
             group='prior', 
             var_names=variable,
             outline=False,  
             backend='bokeh',
             shade=.5, 
             show=False, 
-            colors='cycle',
+            colors=color_pool_gen(data),
             data_labels=list(data.keys()),
             backend_kwargs=kwg,
             )
@@ -69,9 +92,8 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
     return col
 
 
-# @freezeargs
-# @lru_cache(maxsize=32)
-def posterior_density_plot(variable, data, plottype):
+
+def posterior_density_plot(variable, data, percent, plottype):
     """
     Basically the sama as the prior density plot but uses the posterior instead. Could have resused the same           method with an extra param but the panel.interact method tries to create features for parameter selection          which i dont want in this case
 
@@ -81,28 +103,30 @@ def posterior_density_plot(variable, data, plottype):
         plots = []
         for key,value in data.items():
             plot = az.plot_density(
-                value.model_arviz_data, 
+                value.posteriors[percent],
                 group='posterior', 
                 var_names=variable, 
                 backend='bokeh',
                 outline=False,
                 shade=.5, 
                 show=False,
+                colors=value.color,
                 )
             for p in plot[0]:
                 p.title.text = key+' '+p.title.text 
+                p.legend.visible = False
             plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
         col = column(plots)
     else:
         kwg = dict(height=350, width=500,toolbar_location='right')
         plot = az.plot_density(
-            data.arviz_data_list, 
+            posteriors_same_plot_list(data, percent), 
             group='posterior', 
             var_names=variable, 
             backend='bokeh',
             shade=.5, 
             show=False, 
-            colors='cycle',
+            colors=color_pool_gen(data),
             outline=False,
             data_labels=list(data.keys()),
             backend_kwargs=kwg,
@@ -127,7 +151,8 @@ def prior_predictive_density_plot(variable, data):
             backend='bokeh',
             alpha=.5, 
             show=False,
-            backend_kwargs=kwg
+            backend_kwargs=kwg,
+            num_pp_samples=250,
             )
         plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
     col = column(plots)
@@ -144,7 +169,8 @@ def posterior_predictive_density_plot(variable, data):
             backend='bokeh',
             alpha=.5, 
             show=False,
-            backend_kwargs=kwg
+            backend_kwargs=kwg,
+            num_pp_samples=250,
             )
         for p in plot[0]:
             p.title.text = key+' '+p.title.text 
@@ -153,8 +179,6 @@ def posterior_predictive_density_plot(variable, data):
     return col
 
 
-# @freezeargs
-# @lru_cache(maxsize=32)
 def sample_trace_plot(variable, data):
     plots = []
     for key, value in data.items():

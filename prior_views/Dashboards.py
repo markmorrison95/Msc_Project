@@ -52,7 +52,7 @@ class PosteriorDashboard(param.Parameterized):
 
     @param.depends('variable', 'plot_type', 'data', 'percentage')
     def plot(self):
-        return posterior_density_plot(variable=self.variable, data=list(self.data.values())[0].posteriors[self.percentage], plottype=self.plot_type)
+        return posterior_density_plot(variable=self.variable, data=self.data, percent=self.percentage, plottype=self.plot_type)
 
 
     def panel(self):

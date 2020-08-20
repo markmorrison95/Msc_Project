@@ -9,6 +9,9 @@ class Main_controls:
         self.app = CreateApp(controls=self, models=self.models)
 
 
-    def add_new_model_config(self, prior_args:dict):
-        models.add_model(prior_args=prior_args)
-        self.app.new_model_added()
+    def add_new_model_config(self, prior_args:dict, name:str):
+        new_model = self.models.add_model(
+            prior_args=prior_args,
+            name = name,
+            )
+        self.app.new_model_added(new_prior_model=new_model)
