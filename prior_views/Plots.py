@@ -7,6 +7,7 @@ from functools import lru_cache
 import functools
 from theano.misc.frozendict import frozendict
 
+
 def freezeargs(func):
     """Transform mutable dictionnary
     Into immutable
@@ -35,6 +36,12 @@ def posteriors_same_plot_list(model_dict, percent):
         data_list.append(model.posteriors[percent])
     return data_list
 
+def color_pool_gen(model_dict):
+    colors = []
+    for model in model_dict.values():
+        colors.append(model.color)
+    return colors
+
 
 def prior_density_plot(variable,data, plottype='Seperate Plots'):
     """
@@ -55,9 +62,11 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
                 backend='bokeh',
                 shade=.5, 
                 show=False,
+                colors=value.color,
                 )
             for p in plot[0]:
                 p.title.text = key+' '+p.title.text 
+                p.legend.visible = False
             plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
         col = column(plots)
     else:
@@ -70,7 +79,7 @@ def prior_density_plot(variable,data, plottype='Seperate Plots'):
             backend='bokeh',
             shade=.5, 
             show=False, 
-            colors='cycle',
+            colors=color_pool_gen(data),
             data_labels=list(data.keys()),
             backend_kwargs=kwg,
             )
@@ -101,9 +110,11 @@ def posterior_density_plot(variable, data, percent, plottype):
                 outline=False,
                 shade=.5, 
                 show=False,
+                colors=value.color,
                 )
             for p in plot[0]:
                 p.title.text = key+' '+p.title.text 
+                p.legend.visible = False
             plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
         col = column(plots)
     else:
@@ -115,7 +126,7 @@ def posterior_density_plot(variable, data, percent, plottype):
             backend='bokeh',
             shade=.5, 
             show=False, 
-            colors='cycle',
+            colors=color_pool_gen(data),
             outline=False,
             data_labels=list(data.keys()),
             backend_kwargs=kwg,
@@ -140,7 +151,8 @@ def prior_predictive_density_plot(variable, data):
             backend='bokeh',
             alpha=.5, 
             show=False,
-            backend_kwargs=kwg
+            backend_kwargs=kwg,
+            num_pp_samples=250,
             )
         plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
     col = column(plots)
@@ -157,7 +169,8 @@ def posterior_predictive_density_plot(variable, data):
             backend='bokeh',
             alpha=.5, 
             show=False,
-            backend_kwargs=kwg
+            backend_kwargs=kwg,
+            num_pp_samples=250,
             )
         for p in plot[0]:
             p.title.text = key+' '+p.title.text 

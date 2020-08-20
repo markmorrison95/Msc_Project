@@ -1,5 +1,4 @@
 from prior_views.model import model
-import webbrowser
 
 class model_container:
     def __init__(self, model:model):
@@ -8,6 +7,13 @@ class model_container:
         self.model_data = model.original_data
 
     def add_model(self, prior_args:dict, name):
+        i = 1
+        temp_name = name
+        while temp_name in self.models_dict:
+        # checks if the name already exists. If so adds a (1) or another int until free slot created
+            temp_name = name + '('+ str(i) + ')'
+            i+=1
+        name = temp_name
         new_model = model(
             model=self.original_model.model_function, 
             data=self.model_data, 
