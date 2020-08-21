@@ -7,7 +7,6 @@ import functools
 import webbrowser
 from prior_views.models_container import model_container
 from threading import Thread
-from webcolors import hex_to_rgb
 
 
 def dict_to_string(dic: dict):
@@ -39,36 +38,36 @@ class CreateApp:
                                )
         self.prior.param.variable.objects = prior_vars
         self.prior.set_default(param_name='variable', value=prior_vars[0])
-        prior_predictive = PriorPredictiveDashboard(
+        self.prior_predictive = PriorPredictiveDashboard(
             name='Prior_Predictive_Dashboard',
             data=self.models.models_dict,
             )
-        prior_predictive.param.variable.objects = prior_predictive_vars
-        prior_predictive.set_default(param_name='variable', value=prior_predictive_vars[0])
-        posterior = PosteriorDashboard(
+        self.prior_predictive.param.variable.objects = prior_predictive_vars
+        self.prior_predictive.set_default(param_name='variable', value=prior_predictive_vars[0])
+        self.posterior = PosteriorDashboard(
             name='Posterior_Dashboard', 
             data=self.models.models_dict
             )
-        posterior.param.variable.objects = posterior_vars
-        posterior.set_default(param_name='variable', value=posterior_vars[0])
-        posterior_predictive = posterior_predictive_Dashboard(
+        self.posterior.param.variable.objects = posterior_vars
+        self.posterior.set_default(param_name='variable', value=posterior_vars[0])
+        self.posterior_predictive = posterior_predictive_Dashboard(
             name= 'posterior_predictive_dashboard',
             data=self.models.models_dict,
             )
-        posterior_predictive.param.variable.objects = posterior_predictive_vars
-        posterior_predictive.set_default(param_name='variable', value=posterior_predictive_vars[0])
-        sample_trace = sample_trace_dashboard(
+        self.posterior_predictive.param.variable.objects = posterior_predictive_vars
+        self.posterior_predictive.set_default(param_name='variable', value=posterior_predictive_vars[0])
+        self.sample_trace = sample_trace_dashboard(
             name='sample_trace_dashboard',
             data=self.models.models_dict,
             )
-        sample_trace.param.variable.objects = posterior_vars
-        sample_trace.set_default(param_name='variable', value=posterior_vars[0])
+        self.sample_trace.param.variable.objects = posterior_vars
+        self.sample_trace.set_default(param_name='variable', value=posterior_vars[0])
         dashboard = pn.Tabs(
             ('Prior', self.prior.panel().servable()),
-            ('Prior_Predictive', prior_predictive.panel().servable()),
-            ('Posterior', posterior.panel().servable()),
-            ('Posterior_Predictive', posterior_predictive.panel().servable()),
-            ('Sample_Trace', sample_trace.panel().servable()),
+            ('Prior_Predictive', self.prior_predictive.panel().servable()),
+            ('Posterior', self.posterior.panel().servable()),
+            ('Posterior_Predictive', self.posterior_predictive.panel().servable()),
+            ('Sample_Trace', self.sample_trace.panel().servable()),
         )
         m_kwars = self.models.models_dict['Original'].model_kwargs
         self.prior_sliders = self.model_selector_sliders(m_kwars)
@@ -133,8 +132,13 @@ class CreateApp:
             )
             )
         )
-        name = ['data', 'variable']
-        self.prior.trigger(*name)
+        pram = ['variable',]
+        self.prior.param.trigger(*pram)
+        self.prior_predictive.param.trigger(*pram)
+        self.posterior.param.trigger(*pram)
+        self.posterior_predictive.param.trigger(*pram)
+        self.sample_trace.param.trigger(*pram)
+        
 
 
 
