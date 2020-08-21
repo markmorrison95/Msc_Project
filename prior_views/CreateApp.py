@@ -34,34 +34,37 @@ class CreateApp:
         posterior_vars = self.models.original_model.posterior_variables()
         prior_predictive_vars = self.models.original_model.prior_predictive_variables()
         posterior_predictive_vars = self.models.original_model.posterior_predictive_variables()
-        prior = PriorDashboard(name='Prior_Dashboard',
+        self.prior = PriorDashboard(name='Prior_Dashboard',
                                data=self.models.models_dict,
                                )
-        prior.param.variable.objects = prior_vars
-        prior.panel()
+        self.prior.param.variable.objects = prior_vars
+        self.prior.set_default(param_name='variable', value=prior_vars[0])
         prior_predictive = PriorPredictiveDashboard(
             name='Prior_Predictive_Dashboard',
             data=self.models.models_dict,
             )
         prior_predictive.param.variable.objects = prior_predictive_vars
+        prior_predictive.set_default(param_name='variable', value=prior_predictive_vars[0])
         posterior = PosteriorDashboard(
             name='Posterior_Dashboard', 
             data=self.models.models_dict
             )
         posterior.param.variable.objects = posterior_vars
-        posterior.panel()
+        posterior.set_default(param_name='variable', value=posterior_vars[0])
         posterior_predictive = posterior_predictive_Dashboard(
             name= 'posterior_predictive_dashboard',
             data=self.models.models_dict,
             )
         posterior_predictive.param.variable.objects = posterior_predictive_vars
+        posterior_predictive.set_default(param_name='variable', value=posterior_predictive_vars[0])
         sample_trace = sample_trace_dashboard(
             name='sample_trace_dashboard',
             data=self.models.models_dict,
             )
         sample_trace.param.variable.objects = posterior_vars
+        sample_trace.set_default(param_name='variable', value=posterior_vars[0])
         dashboard = pn.Tabs(
-            ('Prior', prior.panel().servable()),
+            ('Prior', self.prior.panel().servable()),
             ('Prior_Predictive', prior_predictive.panel().servable()),
             ('Posterior', posterior.panel().servable()),
             ('Posterior_Predictive', posterior_predictive.panel().servable()),
@@ -130,6 +133,8 @@ class CreateApp:
             )
             )
         )
+        name = ['data', 'variable']
+        self.prior.trigger(*name)
 
 
 

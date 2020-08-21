@@ -8,19 +8,11 @@ from bokeh.plotting import curdoc
 # inputs_2 is the selection type for plots. Need to change name and spelling of Seperate.
 inputs_2 = ['Seperate Plots','Same Plot' ]
 
-"""
-Have to set the variables with default selectors containing None as there is no way to initialise the classes with 
-the variables already there for param selectors. None allows for the plots to be called although will initially create with all the variables.
-Computationally this is not ideal, especially for sets with large amounts of variables, but will just slow down initial load time and not
-slow the actual UI down, as when the UI loads it will be done with the variables selector.
-"""
-default_selectors = [None, None, None]
-
 
 class PriorDashboard(param.Parameterized):
     # precedence less than one means it is not a user displayed option. Set through initial params passed
     data = param.Dict(precedence=-1)
-    variable = param.Selector(default_selectors)
+    variable = param.Selector(None)
     plot_type = param.Selector(inputs_2, default=inputs_2[0])
 
     @param.depends('variable', 'plot_type', 'data')
@@ -33,7 +25,7 @@ class PriorDashboard(param.Parameterized):
 
 class PriorPredictiveDashboard(param.Parameterized):
     data = param.Dict(precedence=-1)
-    variable = param.Selector(default_selectors)
+    variable = param.Selector(None)
 
     @param.depends('variable', 'data')
     def plot(self):
@@ -45,7 +37,7 @@ class PriorPredictiveDashboard(param.Parameterized):
 
 class PosteriorDashboard(param.Parameterized):
     data = param.Dict(precedence=-1)
-    variable = param.Selector(default_selectors)
+    variable = param.Selector(None)
     plot_type = param.Selector(inputs_2, default=inputs_2[0], doc='Type of Plot:')
     percentage = param.Number(default=100, bounds=(80,100), step=5, doc='Percentage of Data:')
 
@@ -60,7 +52,7 @@ class PosteriorDashboard(param.Parameterized):
 
 class posterior_predictive_Dashboard(param.Parameterized):
     data = param.Dict(precedence=-1)
-    variable = param.Selector(default_selectors)
+    variable = param.Selector(None)
 
     @param.depends('variable', 'data')
     def plot(self):
@@ -72,7 +64,7 @@ class posterior_predictive_Dashboard(param.Parameterized):
 
 class sample_trace_dashboard(param.Parameterized):
     data = param.Dict(precedence=-1)
-    variable = param.Selector(default_selectors)
+    variable = param.Selector(None)
 
     @param.depends('variable', 'data')
     def plot(self):
