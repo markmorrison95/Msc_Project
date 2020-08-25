@@ -75,7 +75,10 @@ def prior_density_plot(variable,data, plottype='Separate Plots'):
                 # setting the title of the plots so have the config name at the start
                 # also changing the axis range so plots are linked at same range
                 p.title.text = key+' '+p.title.text 
-                p.legend.visible = False
+                try:
+                    p.legend.visible = False
+                except:
+                    pass
                 p.x_range = x_axes
                 p.y_range = y_axes
             plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
@@ -246,7 +249,10 @@ def sample_trace_plot(variable, data):
             # setting the title of the plots so have the config name at the start
             # also changing the axis range so plots are linked at same range
             p.title.text = key+' '+p.title.text 
-            p.legend.visible = False
+            try:
+                p.legend.visible = False
+            except:
+                pass
             p.x_range = x_axes
             p.y_range = y_axes
         plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))

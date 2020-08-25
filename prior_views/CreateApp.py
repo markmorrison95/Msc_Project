@@ -168,8 +168,12 @@ class CreateApp:
         sliders.append(pn.widgets.TextInput(
             name='Prior Config Name:', value=('eg. Prior 1')))
         for key, val in prior_args.items():
-            upper_bound = val*1.5
-            lower_bound = val*.5
+            if val != 0:
+                upper_bound = val*1.5
+                lower_bound = val*.5
+            else:
+                upper_bound = 20
+                lower_bound = -20
             sliders.append(
                 pn.widgets.FloatSlider(
                                     name=key, 

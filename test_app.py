@@ -1,37 +1,28 @@
-from functools import partial
-from random import random
-from threading import Thread
-import time
+import pymc3 as pm
+from prior_views.app import app_view
+import pandas as pd
 
-from bokeh.models import ColumnDataSource
-from bokeh.plotting import curdoc, figure
 
-from tornado import gen
+def model_method(data, **prior_params):
+    with pm.Model() as model:
+        mu = pm.Normal("mu", mu=prior_params['height_mean_mu'], sd=prior_params['height_mean_sd'])
+        sigma = pm.Uniform("sigma", lower=prior_params['sd_lower'], upper=prior_params['sd_upper'])
+        height = pm.Normal("height", mu=mu, sd=sigma, observed=data.height)
 
-# this must only be modified from a Bokeh session callback
-source = ColumnDataSource(data=dict(x=[0], y=[0]))
+    return model
 
-# This is important! Save curdoc() to make sure all threads
-# see the same document.
-doc = curdoc()
 
-@gen.coroutine
-def update(x, y):
-    source.stream(dict(x=[x], y=[y]))
 
-def blocking_task():
-    while True:
-        # do some blocking computation
-        time.sleep(0.1)
-        x, y = random(), random()
+d = pd.read_csv("Howell1.csv", sep=";", header=0)
+data = d[d.age >= 18]
 
-        # but update the document from callback
-        doc.add_next_tick_callback(partial(update, x=x, y=y))
+params= {
+    'height_mean_mu':178,
+    'height_mean_sd':20,
+    'sd_lower':0,
+    'sd_upper':50,
+}
 
-p = figure(x_range=[0, 1], y_range=[0,1])
-l = p.circle(x='x', y='y', source=source)
 
-doc.add_root(p)
 
-thread = Thread(target=blocking_task)
-thread.start()
+app = app_view(model_method, data, **params)
