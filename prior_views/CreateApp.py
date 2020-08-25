@@ -92,7 +92,7 @@ class CreateApp:
                 name='Sampling In Progress',
                 active=True,
                 bar_color='info',
-                width=320,
+                width=300,
             )
         )
         thread = Thread(
@@ -125,12 +125,14 @@ class CreateApp:
             )
             )
         )
+        # ************ triggers a reload of param classes reproducing plots ***********
         pram = ['variable',]
         self.prior.param.trigger(*pram)
         self.prior_predictive.param.trigger(*pram)
         self.posterior.param.trigger(*pram)
         self.posterior_predictive.param.trigger(*pram)
         self.sample_trace.param.trigger(*pram)
+        # *******************************************************************************
         
 
 
@@ -218,5 +220,5 @@ class CreateApp:
         server = pn.serve(self.r, show=False, loop=loop, start=False, **args)
         # nest_asyncio required because if opening in jupyter notebooks, IOloop is already in use
         nest_asyncio.apply()
-        return server.start()
+        return server.run_until_shutdown()
         # server.io_loop.start()

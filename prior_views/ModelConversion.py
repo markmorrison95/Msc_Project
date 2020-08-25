@@ -15,6 +15,16 @@ def convert_full_model(model):
         trace = pm.sample(progressbar=False)
         prior = pm.sample_prior_predictive()
         posterior = pm.sample_posterior_predictive(trace,progressbar=False)
+        """********************************************************
+            Forcing the output values from the model to be
+            float64. This creates continuity on the values
+            and allows for plotting of multiple variables/outputs
+            into one plot without error"""
+        for key, val in prior.items():
+                prior[key] = val.astype('float64')
+        for key, val in posterior.items():
+            posterior[key] = val.astype('float64')
+        """*******************************************************"""
         data = az.from_pymc3(
                     trace=trace,
                     prior=prior,
@@ -26,6 +36,14 @@ def convert_posterior_model(model):
     with model:
         trace = pm.sample(progressbar=False)
         posterior = pm.sample_posterior_predictive(trace,progressbar=False)
+        """********************************************************
+            Forcing the output values from the model to be
+            float64. This creates continuity on the values
+            and allows for plotting of multiple variables/outputs
+            into one plot without error"""
+        for key, val in posterior.items():
+            posterior[key] = val.astype('float64')
+        """*******************************************************"""
         data = az.from_pymc3(
                     trace=trace,
                     posterior_predictive=posterior,
@@ -63,7 +81,7 @@ def reduce_data_remove(data, fraction):
         data = data.copy(deep=True)
         size = len(data)
         to_remove = int(size - (size*fraction))
-        data.drop(list(data.loc[random.sample(list(data.index), to_remove)].index))
+        data = data.drop(list(data.loc[random.sample(list(data.index), to_remove)].index))
         return data
     else:
         raise TypeError("Only Pandas DataFrame or Series allowed")
