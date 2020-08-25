@@ -75,10 +75,8 @@ def prior_density_plot(variable,data, plottype='Separate Plots'):
                 # setting the title of the plots so have the config name at the start
                 # also changing the axis range so plots are linked at same range
                 p.title.text = key+' '+p.title.text 
-                try:
+                if p.legend != None:
                     p.legend.visible = False
-                except:
-                    pass
                 p.x_range = x_axes
                 p.y_range = y_axes
             plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
@@ -131,17 +129,19 @@ def posterior_density_plot(variable, data, percent, plottype):
                 colors=value.color,
                 backend_kwargs=kwg,
                 )
-        if len(x_axis_range) == 0:
-            for p in plot[0]:
-                x_axis_range.append(p.x_range)
-                y_axis_range.append(p.y_range)
-        for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
-            # setting the title of the plots so have the config name at the start
-            # also changing the axis range so plots are linked at same range
-            p.title.text = key+' '+p.title.text 
-            p.x_range = x_axes
-            p.y_range = y_axes
-            plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
+            if len(x_axis_range) == 0:
+                for p in plot[0]:
+                    x_axis_range.append(p.x_range)
+                    y_axis_range.append(p.y_range)
+            for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
+                # setting the title of the plots so have the config name at the start
+                # also changing the axis range so plots are linked at same range
+                if p.legend != None:
+                    p.legend.visible = False
+                p.title.text = key+' '+p.title.text 
+                p.x_range = x_axes
+                p.y_range = y_axes
+                plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
         col = column(plots)
     else:
         kwg = dict(height=450, width=650,toolbar_location='right')
@@ -249,10 +249,8 @@ def sample_trace_plot(variable, data):
             # setting the title of the plots so have the config name at the start
             # also changing the axis range so plots are linked at same range
             p.title.text = key+' '+p.title.text 
-            try:
+            if p.legend != None:
                 p.legend.visible = False
-            except:
-                pass
             p.x_range = x_axes
             p.y_range = y_axes
         plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
