@@ -9,13 +9,6 @@ from prior_views.models_container import model_container
 from threading import Thread
 
 
-def dict_to_string(dic: dict):
-    s = ''
-    for key, value in dic.items():
-        s += (key + ' = ' + str(value) + '<br/>')
-    return s
-
-
 class CreateApp:
     def __init__(self, controls, models: model_container):
         self.controls = controls
