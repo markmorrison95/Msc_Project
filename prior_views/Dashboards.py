@@ -6,7 +6,7 @@ from tornado import gen
 from bokeh.plotting import curdoc
 
 # inputs_2 is the selection type for plots. Need to change name and spelling of Seperate.
-inputs_2 = ['Seperate Plots','Same Plot' ]
+inputs_2 = ['Separate Plots','Same Plot' ]
 
 
 class PriorDashboard(param.Parameterized):

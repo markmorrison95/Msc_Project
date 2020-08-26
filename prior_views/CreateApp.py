@@ -92,7 +92,7 @@ class CreateApp:
                 name='Sampling In Progress',
                 active=True,
                 bar_color='info',
-                width=320,
+                width=300,
             )
         )
         thread = Thread(
@@ -125,12 +125,14 @@ class CreateApp:
             )
             )
         )
+        # ************ triggers a reload of param classes producing plots ***********
         pram = ['variable',]
         self.prior.param.trigger(*pram)
         self.prior_predictive.param.trigger(*pram)
         self.posterior.param.trigger(*pram)
         self.posterior_predictive.param.trigger(*pram)
         self.sample_trace.param.trigger(*pram)
+        # *******************************************************************************
         
 
 
@@ -144,8 +146,12 @@ class CreateApp:
                                 )
                             )
         for (key, val), (key2, val2) in zip(original_prior_args.items(), new_prior_args.items()):
-            upper_bound = val*1.5
-            lower_bound = val*.5
+            if val != 0:
+                upper_bound = val*1.5
+                lower_bound = val*.5
+            else:
+                upper_bound = 20
+                lower_bound = -20
             sliders.append(
                 pn.widgets.FloatSlider(
                     name=key,
@@ -166,8 +172,12 @@ class CreateApp:
         sliders.append(pn.widgets.TextInput(
             name='Prior Config Name:', value=('eg. Prior 1')))
         for key, val in prior_args.items():
-            upper_bound = val*1.5
-            lower_bound = val*.5
+            if val != 0:
+                upper_bound = val*1.5
+                lower_bound = val*.5
+            else:
+                upper_bound = 20
+                lower_bound = -20
             sliders.append(
                 pn.widgets.FloatSlider(
                                     name=key, 
@@ -218,5 +228,5 @@ class CreateApp:
         server = pn.serve(self.r, show=False, loop=loop, start=False, **args)
         # nest_asyncio required because if opening in jupyter notebooks, IOloop is already in use
         nest_asyncio.apply()
-        return server.start()
+        return server.run_until_shutdown()
         # server.io_loop.start()

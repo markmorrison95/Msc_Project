@@ -19,7 +19,7 @@ class model:
         self.posteriors = {}
         self.posteriors[100] = self.model_arviz_data
         for f in data_percentages:
-            p = mc.convert_posterior_model(model(data=mc.data_reduce_with_nan(data, f/100), **model_kwargs))
+            p = mc.convert_posterior_model(model(data=mc.reduce_data_remove(data, f/100), **model_kwargs))
             self.posteriors[f] = p.posterior
         
     def prior_variables(self):
