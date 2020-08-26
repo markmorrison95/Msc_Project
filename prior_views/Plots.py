@@ -7,6 +7,7 @@ import arviz as az
 from functools import lru_cache
 import functools
 from theano.misc.frozendict import frozendict
+from bokeh.document import without_document_lock
 
 
 def freezeargs(func):
@@ -44,6 +45,7 @@ def color_pool_gen(model_dict):
     return colors
 
 
+@without_document_lock
 def prior_density_plot(variable,data, plottype='Separate Plots'):
     """
     Method for producing the prior kde plot using arviz plot_density. 
@@ -75,7 +77,7 @@ def prior_density_plot(variable,data, plottype='Separate Plots'):
                 # setting the title of the plots so have the config name at the start
                 # also changing the axis range so plots are linked at same range
                 p.title.text = key+' '+p.title.text 
-                if p.legend != None:
+                if p.legend:
                     p.legend.visible = False
                 p.x_range = x_axes
                 p.y_range = y_axes
@@ -104,7 +106,7 @@ def prior_density_plot(variable,data, plottype='Separate Plots'):
     return col
 
 
-
+@without_document_lock
 def posterior_density_plot(variable, data, percent, plottype):
     """
     Method for producing the posterior kde plot using arviz plot_density. 
@@ -136,7 +138,7 @@ def posterior_density_plot(variable, data, percent, plottype):
             for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
                 # setting the title of the plots so have the config name at the start
                 # also changing the axis range so plots are linked at same range
-                if p.legend != None:
+                if p.legend:
                     p.legend.visible = False
                 p.title.text = key+' '+p.title.text 
                 p.x_range = x_axes
@@ -165,7 +167,7 @@ def posterior_density_plot(variable, data, percent, plottype):
         col = column(plot[0].tolist())
     return col
 
-
+@without_document_lock
 def prior_predictive_density_plot(variable, data):
     plots = []
     kwg = dict(height=350, width=500)
@@ -195,6 +197,8 @@ def prior_predictive_density_plot(variable, data):
     col = column(plots)
     return col
 
+
+@without_document_lock
 def posterior_predictive_density_plot(variable, data):
     plots = []
     x_axis_range, y_axis_range = [],[]
@@ -226,7 +230,7 @@ def posterior_predictive_density_plot(variable, data):
     col = column(plots)
     return col
 
-
+@without_document_lock
 def sample_trace_plot(variable, data):
     plots = []
     kwg = dict(height=200)
@@ -249,7 +253,7 @@ def sample_trace_plot(variable, data):
             # setting the title of the plots so have the config name at the start
             # also changing the axis range so plots are linked at same range
             p.title.text = key+' '+p.title.text 
-            if p.legend != None:
+            if p.legend:
                 p.legend.visible = False
             p.x_range = x_axes
             p.y_range = y_axes

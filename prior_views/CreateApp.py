@@ -125,7 +125,7 @@ class CreateApp:
             )
             )
         )
-        # ************ triggers a reload of param classes reproducing plots ***********
+        # ************ triggers a reload of param classes producing plots ***********
         pram = ['variable',]
         self.prior.param.trigger(*pram)
         self.prior_predictive.param.trigger(*pram)

@@ -1,6 +1,7 @@
 import pymc3 as pm
 from prior_views.app import app_view
 import pandas as pd
+from prior_views.model import model
 
 
 def model_method(data, **prior_params):
@@ -24,5 +25,5 @@ params= {
 }
 
 
-
-app = app_view(model_method, data, **params)
+# m = model(model_method, data, params)
+app_view(model_method, data, **params)
