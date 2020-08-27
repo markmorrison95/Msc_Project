@@ -15,7 +15,7 @@ def animate():
         sys.stdout.write('\rCreating App ' + c)
         sys.stdout.flush()
         time.sleep(0.1)
-    sys.stdout.write('\rDone!     ')
+    sys.stdout.write('\rDone!')
 
 
 

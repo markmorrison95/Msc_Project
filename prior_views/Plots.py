@@ -4,34 +4,52 @@ import bokeh.plotting as bkp
 from bokeh.models import Legend
 from bokeh.layouts import column, row
 import arviz as az
-from functools import lru_cache
-import functools
-from theano.misc.frozendict import frozendict
 from bokeh.document import without_document_lock
+import sys
 
 
-def freezeargs(func):
-    """Transform mutable dictionnary
-    Into immutable
-    Useful to be compatible with cache
+
+def prior_same_plot_list_cache(func):
     """
-    @functools.wraps(func)
-    def wrapped(*args, **kwargs):
-        args = tuple([frozendict(arg) if isinstance(arg, dict) else arg for arg in args])
-        kwargs = {k: frozendict(v) if isinstance(v, dict) else v for k, v in kwargs.items()}
-        return func(*args, **kwargs)
+    Caches the list of the prior values created to allow the different model configs
+    to be plotted on the same fig.
+    Marginal gains, altough should be useful as more prior configs added
+    """
+    cache = {}
+    def wrapped(model_dict):
+        args = str(len(model_dict))
+        if args in cache:
+            return cache[args]
+        else:
+            val = func(model_dict)
+            cache[args] = val
+            return val
     return wrapped
 
-@freezeargs
-@lru_cache(maxsize=32)
+@prior_same_plot_list_cache
 def priors_same_plot_list(model_dict):
     data_list = []
     for model in model_dict.values():
         data_list.append(model.model_arviz_data)
     return data_list
 
-@freezeargs
-@lru_cache(maxsize=32)
+def posterior_same_plot_list_cache(func):
+    """
+    Caches the list of the posterior values created based of the percentage request
+    Marginal gains, altough may be useful as more prior configs added
+    """
+    cache = {}
+    def wrapped(model_dict, percent):
+        args = str(model_dict.keys()) + str(percent)
+        if args in cache:
+            return cache[args]
+        else:
+            val = func(model_dict, percent)
+            cache[args] = val
+            return val
+    return wrapped
+
+@posterior_same_plot_list_cache
 def posteriors_same_plot_list(model_dict, percent):
     data_list = []
     for model in model_dict.values():
@@ -44,9 +62,32 @@ def color_pool_gen(model_dict):
         colors.append(model.color)
     return colors
 
+def plot_cache(func):
+    """
+    Caching for the plots. Use the length of the dict of models (Data) to
+    check if it is the same data being used as the dict is only added too not
+    removed from. Saves checking if full dict is the same. Creates a string with length
+    of dict and the other variable values to use as a key in dict to save return values
+
+    *** if functionality for removing data is added will need to change *** 
+    """
+    cache = {}
+    def wrapped(**kwargs):
+        args = str(len(kwargs['data']))
+        for k in kwargs.values():
+            args += str(k)
+        if args in cache:
+            return cache[args]
+        else:
+            val = func(**kwargs)
+            cache[args] = val
+            return val
+    return wrapped
+
 
 @without_document_lock
-def prior_density_plot(variable,data, plottype='Separate Plots'):
+@plot_cache
+def prior_density_plot(variable, data, plottype, plot='prior'):
     """
     Method for producing the prior kde plot using arviz plot_density. 
     This is done 2 ways: either will produce all the plots onto one graph or will produe them seperately
@@ -106,8 +147,11 @@ def prior_density_plot(variable,data, plottype='Separate Plots'):
     return col
 
 
+
+
 @without_document_lock
-def posterior_density_plot(variable, data, percent, plottype):
+@plot_cache
+def posterior_density_plot(variable, data, percent, plottype, plot='posterior'):
     """
     Method for producing the posterior kde plot using arviz plot_density. 
     This is done 2 ways: either will produce all the plots onto one graph or will produe them seperately
@@ -167,8 +211,13 @@ def posterior_density_plot(variable, data, percent, plottype):
         col = column(plot[0].tolist())
     return col
 
+
+
+
+
 @without_document_lock
-def prior_predictive_density_plot(variable, data):
+@plot_cache
+def prior_predictive_density_plot(variable, data, plot='prior_predictive'):
     plots = []
     kwg = dict(height=350, width=500)
     x_axis_range, y_axis_range = [],[]
@@ -198,8 +247,25 @@ def prior_predictive_density_plot(variable, data):
     return col
 
 
+
+
+
+def posterior_predictive_density_cache(func):
+    cache = {}
+    def wrapped(variable, data):
+        args = str(len(data)) + variable
+        if args in cache:
+            return cache[args]
+        else:
+            val = func(variable, data)
+            cache[args] = val
+            return val
+    return wrapped
+
+
 @without_document_lock
-def posterior_predictive_density_plot(variable, data):
+@plot_cache
+def posterior_predictive_density_plot(variable, data, plot='posterior_predictive'):
     plots = []
     x_axis_range, y_axis_range = [],[]
     kwg = dict(height=350, width=500)
@@ -230,8 +296,12 @@ def posterior_predictive_density_plot(variable, data):
     col = column(plots)
     return col
 
+
+
+
 @without_document_lock
-def sample_trace_plot(variable, data):
+@plot_cache
+def sample_trace_plot(variable, data, plot='sample_trace'):
     plots = []
     kwg = dict(height=200)
     x_axis_range, y_axis_range = [],[]
