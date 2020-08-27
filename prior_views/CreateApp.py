@@ -147,10 +147,10 @@ class CreateApp:
                             )
         for (key, val), (key2, val2) in zip(original_prior_args.items(), new_prior_args.items()):
             if val != 0:
-                if val > 0 < 1:
-                    d
+                # if val > 0 < 1:
+                #     d
                 upper_bound = val*3
-                lower_bound = val-(val*3)
+                lower_bound = val-(val*2)
             else:
                 upper_bound = 50
                 lower_bound = -50
@@ -175,8 +175,8 @@ class CreateApp:
             name='Prior Config Name:', value=('eg. Prior 1')))
         for key, val in prior_args.items():
             if val != 0:
-                upper_bound = val*1.5
-                lower_bound = val*.5
+                upper_bound = val*3
+                lower_bound = val-(val*2)
             else:
                 upper_bound = 20
                 lower_bound = -20

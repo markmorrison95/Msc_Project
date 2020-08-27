@@ -25,5 +25,5 @@ params= {
 }
 
 
-m = model(model_method, data, params)
-# app_view(model_method, data, **params)
+# m = model(model_method, data, params)
+app_view(model_method, data, **params)
