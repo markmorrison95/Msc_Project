@@ -201,6 +201,12 @@ class CreateApp:
                                         )
                                 )
             except:
+            # *********************************************************************************
+            # trying to add functionality for adding in default weakly priors. 
+            # can get the priors in the dropdown but haven't linked up the drop down
+            # and then the sliders that would be propagated with the param values
+            # https://stackoverflow.com/questions/3501382/checking-whether-a-variable-is-an-integer-or-not
+            # similar result on stackoverflow
                 select_col = pn.Column(background='#e5e4e2')
                 priors = pn.widgets.Select(
                         name = key,
@@ -214,6 +220,7 @@ class CreateApp:
                     return col
                 select_col.append(priors)
                 select_col.append(prior_values(priors))
+            # ***************************************************************************************
         sliders.append(select_col)
         button = pn.widgets.Button(
             name='Add Prior Setting', button_type='primary')
