@@ -84,44 +84,40 @@ def plot_cache(func):
             return val
     return wrapped
 
-# def individual_plot_cache(func):
-#     cache = {}
-#     def wrapped(group, key, var, value, plottype):
-#         cache_key = str(group + key + var + plottype)
-#         if cache_key in cache:
-#             print('in cache')
-#             return cache[cache_key]
-#         else:
-#             val = func(group=group, key=key, var=var, value=value, plottype=plottype)
-#             print('adding to cache')
-#             cache[cache_key] = val
-#             return val
-#     return wrapped
 
 def individual_plot_cache(func):
+    """
+    function decorator used for cacheing individual plots. Same method used for all plot types. 
+    Stores based on group, key (model config name) and variable combinations. These should be unique for the given plots in all cases
+    apart from posterior KDE. 
+    
+    In that case:
+        Checks if the kwargs contains a percent. The original key will have percent added to define the plot.
+    """
     cache = {}
     def wrapped(**kwargs):
         cache_key = str(kwargs['group'] + kwargs['key'] + kwargs['var'])
         if 'percent' in kwargs:
             cache_key += str(kwargs['percent'])
         if cache_key in cache:
-            print('in cache')
             return cache[cache_key]
         else:
             val = func(**kwargs)
-            print('adding to cache')
             cache[cache_key] = val
             return val
     return wrapped
 
-# *************** function for creating plots *******************************
+# *************** function for creating KDE plots *******************************
 @individual_plot_cache
-def plot_call_KDE(group, key, var, value, plottype, percent=100):
+def plot_call_KDE(group, key, var, value, percent=100):
     """ using seperated function to allow for plot caching. Used for both prior and posterior
     KDE plots. If the key, var combo has already been called for that group the plot 
     will be retrieved from cache.
     
-    @group should be either prior or posterior """
+    @group should be either prior or posterior 
+    
+    if the group is posterior will check the percentage of data it needs to plot
+    """
 
     if group == 'posterior':
         data = value.posteriors[percent]
@@ -145,8 +141,6 @@ def plot_call_KDE(group, key, var, value, plottype, percent=100):
         p.title.text = key+' '+p.title.text 
         if p.legend:
             p.legend.visible = False
-        # p.x_range = x_axes
-        # p.y_range = y_axes
     return plot
 # ************************************************************************************
 
@@ -165,20 +159,7 @@ def prior_density_plot(variable, data, plottype, plot='prior'):
         x_axis_range, y_axis_range = [],[]
 
         for key, value in data.items():
-            plot = plot_call_KDE(group='prior', key=key, var=variable, value=value, plottype='KDE')
-
-            # if len(x_axis_range) == 0:
-            #     for p in plot[0]:
-            #         x_axis_range.append(p.x_range)
-            #         y_axis_range.append(p.y_range)
-            # for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
-            #     # setting the title of the plots so have the config name at the start
-            #     # also changing the axis range so plots are linked at same range
-            #     p.title.text = key+' '+p.title.text 
-            #     if p.legend:
-            #         p.legend.visible = False
-            #     p.x_range = x_axes
-            #     p.y_range = y_axes
+            plot = plot_call_KDE(group='prior', key=key, var=variable, value=value)
             plots.append(row(plot[0].tolist()))
         col = plots
     else:
@@ -211,7 +192,7 @@ def prior_density_plot(variable, data, plottype, plot='prior'):
 def posterior_density_plot(variable, data, percent, plottype, plot='posterior'):
     """
     Method for producing the posterior kde plot using arviz plot_density. 
-    This is done 2 ways: either will produce all the plots onto one graph or will produe them seperately
+    This is done 2 ways: either will produce all the plots onto one graph or will produce them seperately
     The parameters are the data : dictionary of model objects, plottype, either "Separate Plots" or "Same Plots" 
     Also takes the variable to view which will be chosen by the dropdown in the program. Requires a percentage which translates
     to a percentage of data used. This corresponds to the values set in the model objects
@@ -221,19 +202,7 @@ def posterior_density_plot(variable, data, percent, plottype, plot='posterior'):
         kwg = dict(height=250, width=550)
         x_axis_range, y_axis_range = [],[]
         for key,value in data.items():
-            plot = plot_call_KDE(group='posterior', key=key, var=variable, value=value, plottype='KDE', percent=percent)
-            # if len(x_axis_range) == 0:
-            #     for p in plot[0]:
-            #         x_axis_range.append(p.x_range)
-            #         y_axis_range.append(p.y_range)
-            # for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
-            #     # setting the title of the plots so have the config name at the start
-            #     # also changing the axis range so plots are linked at same range
-            #     if p.legend:
-            #         p.legend.visible = False
-            #     p.title.text = key+' '+p.title.text 
-            #     p.x_range = x_axes
-            #     p.y_range = y_axes
+            plot = plot_call_KDE(group='posterior', key=key, var=variable, value=value, percent=percent)
             plots.append(row(plot[0].tolist()))
         col = column(plots)
     else:
@@ -259,9 +228,9 @@ def posterior_density_plot(variable, data, percent, plottype, plot='posterior'):
     return col
 
 
-# *************** function for creating plots *******************************
+# *************** function for creating PPC plots *******************************
 @individual_plot_cache
-def plot_call_ppc(group, key, var, value, plottype):
+def plot_call_ppc(group, key, var, value):
     """ using seperated function to allow for plot caching. Used for both prior and posterior
     KDE plots. If the key, var combo has already been called for that group the plot 
     will be retrieved from cache.
@@ -303,27 +272,7 @@ def prior_predictive_density_plot(variable, data, plot='prior_predictive'):
     kwg = dict(height=350, width=500)
     x_axis_range, y_axis_range = [],[]
     for key, value in data.items():
-        plot = plot_call_ppc(group='prior', key=key, var=variable, value=value, plottype='KDE')
-        # plot = az.plot_ppc(
-        #     value.model_arviz_data, 
-        #     group='prior', 
-        #     var_names=variable, 
-        #     backend='bokeh',
-        #     alpha=.5, 
-        #     show=False,
-        #     backend_kwargs=kwg,
-        #     num_pp_samples=250,
-        # )
-        # if len(x_axis_range) == 0:
-        #     for p in plot[0]:
-        #         x_axis_range.append(p.x_range)
-        #         y_axis_range.append(p.y_range)
-        # for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
-        #     # setting the title of the plots so have the config name at the start
-        #     # also changing the axis range so plots are linked at same range
-        #     p.title.text = key+' '+p.title.text 
-        #     p.x_range = x_axes
-        #     p.y_range = y_axes
+        plot = plot_call_ppc(group='prior', key=key, var=variable, value=value)
         plots.append(row(plot[0].tolist()))
     col = column(plots)
     return col
@@ -340,29 +289,7 @@ def posterior_predictive_density_plot(variable, data, plot='posterior_predictive
     x_axis_range, y_axis_range = [],[]
     kwg = dict(height=350, width=500)
     for key, value in data.items():
-        plot = plot_call_ppc(group='posterior', key=key, var=variable, value=value, plottype='KDE')
-        # az.plot_ppc(
-        #     value.model_arviz_data, 
-        #     group='posterior', 
-        #     var_names=variable, 
-        #     backend='bokeh',
-        #     alpha=.5, 
-        #     show=False,
-        #     backend_kwargs=kwg,
-        #     # reduce the number of samples just to improve loading dows. Seems 
-        #     # to slow down the whole application if samples plotted are too high
-        #     num_pp_samples=250,
-        #     )
-        # if len(x_axis_range) == 0:
-        #     for p in plot[0]:
-        #         x_axis_range.append(p.x_range)
-        #         y_axis_range.append(p.y_range)
-        # for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
-        #     # setting the title of the plots so have the config name at the start
-        #     # also changing the axis range so plots are linked at same range
-        #     p.title.text = key+' '+p.title.text 
-        #     p.x_range = x_axes
-        #     p.y_range = y_axes
+        plot = plot_call_ppc(group='posterior', key=key, var=variable, value=value)
         plots.append(row(plot[0].tolist()))
     col = column(plots)
     return col
@@ -370,9 +297,9 @@ def posterior_predictive_density_plot(variable, data, plot='posterior_predictive
 
 
 
-# *************** function for creating plots *******************************
+# *************** function for creating Trace plots *******************************
 @individual_plot_cache
-def plot_call_trace(group, key, var, value, plottype='Trace'):
+def plot_call_trace(group, key, var, value):
     """ using seperated function to allow for plot caching. Used for both prior and posterior
     KDE plots. If the key, var combo has already been called for that group the plot 
     will be retrieved from cache.
@@ -388,10 +315,6 @@ def plot_call_trace(group, key, var, value, plottype='Trace'):
         compact=True,
         combined=True,
         )
-    # if len(x_axis_range) == 0:
-    #     for p in plot[0]:
-    #         x_axis_range.append(p.x_range)
-    #         y_axis_range.append(p.y_range)
     for p in plot[0]:
         # setting the title of the plots so have the config name at the start
         # also changing the axis range so plots are linked at same range
@@ -409,28 +332,11 @@ def sample_trace_plot(variable, data, plot='sample_trace'):
     kwg = dict(height=200)
     x_axis_range, y_axis_range = [],[]
     for key, value in data.items():
-        plot = plot_call_trace(group='', key=key, var=variable, value=value, plottype='Trace')
-        # plot = az.plot_trace(
-        #     value.model_arviz_data, 
-        #     var_names=variable, 
-        #     backend='bokeh', 
-        #     show=False,
-        #     backend_kwargs=kwg,
-        #     compact=True,
-        #     combined=True,
-        #     )
-        # if len(x_axis_range) == 0:
-        #     for p in plot[0]:
-        #         x_axis_range.append(p.x_range)
-        #         y_axis_range.append(p.y_range)
-        # for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
-        #     # setting the title of the plots so have the config name at the start
-        #     # also changing the axis range so plots are linked at same range
-        #     p.title.text = key+' '+p.title.text 
-        #     if p.legend:
-        #         p.legend.visible = False
-        #     p.x_range = x_axes
-        #     p.y_range = y_axes
+        plot = plot_call_trace(group='', key=key, var=variable, value=value)
         plots.append(row(plot[0].tolist()))
     col = column(plots)
     return col
+
+
+
+    
