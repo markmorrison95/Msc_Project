@@ -84,6 +84,72 @@ def plot_cache(func):
             return val
     return wrapped
 
+# def individual_plot_cache(func):
+#     cache = {}
+#     def wrapped(group, key, var, value, plottype):
+#         cache_key = str(group + key + var + plottype)
+#         if cache_key in cache:
+#             print('in cache')
+#             return cache[cache_key]
+#         else:
+#             val = func(group=group, key=key, var=var, value=value, plottype=plottype)
+#             print('adding to cache')
+#             cache[cache_key] = val
+#             return val
+#     return wrapped
+
+def individual_plot_cache(func):
+    cache = {}
+    def wrapped(**kwargs):
+        cache_key = str(kwargs['group'] + kwargs['key'] + kwargs['var'])
+        if 'percent' in kwargs:
+            cache_key += str(kwargs['percent'])
+        if cache_key in cache:
+            print('in cache')
+            return cache[cache_key]
+        else:
+            val = func(**kwargs)
+            print('adding to cache')
+            cache[cache_key] = val
+            return val
+    return wrapped
+
+# *************** function for creating plots *******************************
+@individual_plot_cache
+def plot_call_KDE(group, key, var, value, plottype, percent=100):
+    """ using seperated function to allow for plot caching. Used for both prior and posterior
+    KDE plots. If the key, var combo has already been called for that group the plot 
+    will be retrieved from cache.
+    
+    @group should be either prior or posterior """
+
+    if group == 'posterior':
+        data = value.posteriors[percent]
+    else:
+        data = value.model_arviz_data
+    kwg = dict(height=250, width=550)
+    plot = az.plot_density(
+        data,
+        group=group, 
+        var_names=var,
+        outline=False, 
+        backend='bokeh',
+        shade=.5, 
+        show=False,
+        colors=value.color,
+        backend_kwargs=kwg
+        )
+    for p in plot[0]:
+        # setting the title of the plots so have the config name at the start
+        # also changing the axis range so plots are linked at same range
+        p.title.text = key+' '+p.title.text 
+        if p.legend:
+            p.legend.visible = False
+        # p.x_range = x_axes
+        # p.y_range = y_axes
+    return plot
+# ************************************************************************************
+
 
 @without_document_lock
 @plot_cache
@@ -96,33 +162,24 @@ def prior_density_plot(variable, data, plottype, plot='prior'):
     """
     if plottype == 'Separate Plots':
         plots = pn.Column(scroll=True, max_height=750, sizing_mode='stretch_both')
-        kwg = dict(height=250, width=550)
         x_axis_range, y_axis_range = [],[]
+
         for key, value in data.items():
-            plot = az.plot_density(
-                value.model_arviz_data,
-                group='prior', 
-                var_names=variable,
-                outline=False, 
-                backend='bokeh',
-                shade=.5, 
-                show=False,
-                colors=value.color,
-                backend_kwargs=kwg
-                )
-            if len(x_axis_range) == 0:
-                for p in plot[0]:
-                    x_axis_range.append(p.x_range)
-                    y_axis_range.append(p.y_range)
-            for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
-                # setting the title of the plots so have the config name at the start
-                # also changing the axis range so plots are linked at same range
-                p.title.text = key+' '+p.title.text 
-                if p.legend:
-                    p.legend.visible = False
-                p.x_range = x_axes
-                p.y_range = y_axes
-            plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
+            plot = plot_call_KDE(group='prior', key=key, var=variable, value=value, plottype='KDE')
+
+            # if len(x_axis_range) == 0:
+            #     for p in plot[0]:
+            #         x_axis_range.append(p.x_range)
+            #         y_axis_range.append(p.y_range)
+            # for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
+            #     # setting the title of the plots so have the config name at the start
+            #     # also changing the axis range so plots are linked at same range
+            #     p.title.text = key+' '+p.title.text 
+            #     if p.legend:
+            #         p.legend.visible = False
+            #     p.x_range = x_axes
+            #     p.y_range = y_axes
+            plots.append(row(plot[0].tolist()))
         col = plots
     else:
         kwg = dict(height=450, width=650,toolbar_location='right')
@@ -164,30 +221,20 @@ def posterior_density_plot(variable, data, percent, plottype, plot='posterior'):
         kwg = dict(height=250, width=550)
         x_axis_range, y_axis_range = [],[]
         for key,value in data.items():
-            plot = az.plot_density(
-                value.posteriors[percent],
-                group='posterior', 
-                var_names=variable, 
-                backend='bokeh',
-                outline=False,
-                shade=.5, 
-                show=False,
-                colors=value.color,
-                backend_kwargs=kwg,
-                )
-            if len(x_axis_range) == 0:
-                for p in plot[0]:
-                    x_axis_range.append(p.x_range)
-                    y_axis_range.append(p.y_range)
-            for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
-                # setting the title of the plots so have the config name at the start
-                # also changing the axis range so plots are linked at same range
-                if p.legend:
-                    p.legend.visible = False
-                p.title.text = key+' '+p.title.text 
-                p.x_range = x_axes
-                p.y_range = y_axes
-                plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
+            plot = plot_call_KDE(group='posterior', key=key, var=variable, value=value, plottype='KDE', percent=percent)
+            # if len(x_axis_range) == 0:
+            #     for p in plot[0]:
+            #         x_axis_range.append(p.x_range)
+            #         y_axis_range.append(p.y_range)
+            # for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
+            #     # setting the title of the plots so have the config name at the start
+            #     # also changing the axis range so plots are linked at same range
+            #     if p.legend:
+            #         p.legend.visible = False
+            #     p.title.text = key+' '+p.title.text 
+            #     p.x_range = x_axes
+            #     p.y_range = y_axes
+            plots.append(row(plot[0].tolist()))
         col = column(plots)
     else:
         kwg = dict(height=450, width=650,toolbar_location='right')
@@ -212,6 +259,40 @@ def posterior_density_plot(variable, data, percent, plottype, plot='posterior'):
     return col
 
 
+# *************** function for creating plots *******************************
+@individual_plot_cache
+def plot_call_ppc(group, key, var, value, plottype):
+    """ using seperated function to allow for plot caching. Used for both prior and posterior
+    KDE plots. If the key, var combo has already been called for that group the plot 
+    will be retrieved from cache.
+    
+    @group should be either prior or posterior """
+    kwg = dict(height=350, width=500)
+    # x_axis_range, y_axis_range = [],[]
+    plot = az.plot_ppc(
+        value.model_arviz_data, 
+        group=group, 
+        var_names=var, 
+        backend='bokeh',
+        alpha=.5, 
+        show=False,
+        backend_kwargs=kwg,
+        num_pp_samples=250,
+    )
+    for p in plot[0]:
+        # setting the title of the plots so have the config name at the start
+        # also changing the axis range so plots are linked at same range
+        p.title.text = key+' '+p.title.text 
+        # p.x_range = x_axes
+        # p.y_range = y_axes
+    return plot
+# ************************************************************************************
+
+
+
+
+
+
 
 
 
@@ -222,45 +303,34 @@ def prior_predictive_density_plot(variable, data, plot='prior_predictive'):
     kwg = dict(height=350, width=500)
     x_axis_range, y_axis_range = [],[]
     for key, value in data.items():
-        plot = az.plot_ppc(
-            value.model_arviz_data, 
-            group='prior', 
-            var_names=variable, 
-            backend='bokeh',
-            alpha=.5, 
-            show=False,
-            backend_kwargs=kwg,
-            num_pp_samples=250,
-        )
-        if len(x_axis_range) == 0:
-            for p in plot[0]:
-                x_axis_range.append(p.x_range)
-                y_axis_range.append(p.y_range)
-        for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
-            # setting the title of the plots so have the config name at the start
-            # also changing the axis range so plots are linked at same range
-            p.title.text = key+' '+p.title.text 
-            p.x_range = x_axes
-            p.y_range = y_axes
-        plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
+        plot = plot_call_ppc(group='prior', key=key, var=variable, value=value, plottype='KDE')
+        # plot = az.plot_ppc(
+        #     value.model_arviz_data, 
+        #     group='prior', 
+        #     var_names=variable, 
+        #     backend='bokeh',
+        #     alpha=.5, 
+        #     show=False,
+        #     backend_kwargs=kwg,
+        #     num_pp_samples=250,
+        # )
+        # if len(x_axis_range) == 0:
+        #     for p in plot[0]:
+        #         x_axis_range.append(p.x_range)
+        #         y_axis_range.append(p.y_range)
+        # for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
+        #     # setting the title of the plots so have the config name at the start
+        #     # also changing the axis range so plots are linked at same range
+        #     p.title.text = key+' '+p.title.text 
+        #     p.x_range = x_axes
+        #     p.y_range = y_axes
+        plots.append(row(plot[0].tolist()))
     col = column(plots)
     return col
 
 
 
 
-
-def posterior_predictive_density_cache(func):
-    cache = {}
-    def wrapped(variable, data):
-        args = str(len(data)) + variable
-        if args in cache:
-            return cache[args]
-        else:
-            val = func(variable, data)
-            cache[args] = val
-            return val
-    return wrapped
 
 
 @without_document_lock
@@ -270,33 +340,66 @@ def posterior_predictive_density_plot(variable, data, plot='posterior_predictive
     x_axis_range, y_axis_range = [],[]
     kwg = dict(height=350, width=500)
     for key, value in data.items():
-        plot = az.plot_ppc(
-            value.model_arviz_data, 
-            group='posterior', 
-            var_names=variable, 
-            backend='bokeh',
-            alpha=.5, 
-            show=False,
-            backend_kwargs=kwg,
-            # reduce the number of samples just to improve loading dows. Seems 
-            # to slow down the whole application if samples plotted are too high
-            num_pp_samples=250,
-            )
-        if len(x_axis_range) == 0:
-            for p in plot[0]:
-                x_axis_range.append(p.x_range)
-                y_axis_range.append(p.y_range)
-        for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
-            # setting the title of the plots so have the config name at the start
-            # also changing the axis range so plots are linked at same range
-            p.title.text = key+' '+p.title.text 
-            p.x_range = x_axes
-            p.y_range = y_axes
-        plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
+        plot = plot_call_ppc(group='posterior', key=key, var=variable, value=value, plottype='KDE')
+        # az.plot_ppc(
+        #     value.model_arviz_data, 
+        #     group='posterior', 
+        #     var_names=variable, 
+        #     backend='bokeh',
+        #     alpha=.5, 
+        #     show=False,
+        #     backend_kwargs=kwg,
+        #     # reduce the number of samples just to improve loading dows. Seems 
+        #     # to slow down the whole application if samples plotted are too high
+        #     num_pp_samples=250,
+        #     )
+        # if len(x_axis_range) == 0:
+        #     for p in plot[0]:
+        #         x_axis_range.append(p.x_range)
+        #         y_axis_range.append(p.y_range)
+        # for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
+        #     # setting the title of the plots so have the config name at the start
+        #     # also changing the axis range so plots are linked at same range
+        #     p.title.text = key+' '+p.title.text 
+        #     p.x_range = x_axes
+        #     p.y_range = y_axes
+        plots.append(row(plot[0].tolist()))
     col = column(plots)
     return col
 
 
+
+
+# *************** function for creating plots *******************************
+@individual_plot_cache
+def plot_call_trace(group, key, var, value, plottype='Trace'):
+    """ using seperated function to allow for plot caching. Used for both prior and posterior
+    KDE plots. If the key, var combo has already been called for that group the plot 
+    will be retrieved from cache.
+    
+    @group should be either prior or posterior """
+    kwg = dict(height=200)
+    plot = az.plot_trace(
+        value.model_arviz_data, 
+        var_names=var,
+        backend='bokeh', 
+        show=False,
+        backend_kwargs=kwg,
+        compact=True,
+        combined=True,
+        )
+    # if len(x_axis_range) == 0:
+    #     for p in plot[0]:
+    #         x_axis_range.append(p.x_range)
+    #         y_axis_range.append(p.y_range)
+    for p in plot[0]:
+        # setting the title of the plots so have the config name at the start
+        # also changing the axis range so plots are linked at same range
+        p.title.text = key+' '+p.title.text 
+        if p.legend:
+            p.legend.visible = False
+    return plot
+# ************************************************************************************
 
 
 @without_document_lock
@@ -306,27 +409,28 @@ def sample_trace_plot(variable, data, plot='sample_trace'):
     kwg = dict(height=200)
     x_axis_range, y_axis_range = [],[]
     for key, value in data.items():
-        plot = az.plot_trace(
-            value.model_arviz_data, 
-            var_names=variable, 
-            backend='bokeh', 
-            show=False,
-            backend_kwargs=kwg,
-            compact=True,
-            combined=True,
-            )
-        if len(x_axis_range) == 0:
-            for p in plot[0]:
-                x_axis_range.append(p.x_range)
-                y_axis_range.append(p.y_range)
-        for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
-            # setting the title of the plots so have the config name at the start
-            # also changing the axis range so plots are linked at same range
-            p.title.text = key+' '+p.title.text 
-            if p.legend:
-                p.legend.visible = False
-            p.x_range = x_axes
-            p.y_range = y_axes
-        plots.append(row(plot[0].tolist(), sizing_mode='scale_both'))
+        plot = plot_call_trace(group='', key=key, var=variable, value=value, plottype='Trace')
+        # plot = az.plot_trace(
+        #     value.model_arviz_data, 
+        #     var_names=variable, 
+        #     backend='bokeh', 
+        #     show=False,
+        #     backend_kwargs=kwg,
+        #     compact=True,
+        #     combined=True,
+        #     )
+        # if len(x_axis_range) == 0:
+        #     for p in plot[0]:
+        #         x_axis_range.append(p.x_range)
+        #         y_axis_range.append(p.y_range)
+        # for p, x_axes, y_axes in zip(plot[0], x_axis_range, y_axis_range):
+        #     # setting the title of the plots so have the config name at the start
+        #     # also changing the axis range so plots are linked at same range
+        #     p.title.text = key+' '+p.title.text 
+        #     if p.legend:
+        #         p.legend.visible = False
+        #     p.x_range = x_axes
+        #     p.y_range = y_axes
+        plots.append(row(plot[0].tolist()))
     col = column(plots)
     return col

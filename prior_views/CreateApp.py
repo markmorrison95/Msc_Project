@@ -172,7 +172,7 @@ class CreateApp:
     def model_selector_sliders(self, prior_args: dict):
         sliders = pn.Column()
         sliders.append(pn.widgets.TextInput(
-            name='Prior Config Name:', value=('eg. Prior 1')))
+            name='Prior Config Name:', placeholder=('eg. Prior 1')))
         for key, val in prior_args.items():
             if val != 0:
                 upper_bound = val*3
