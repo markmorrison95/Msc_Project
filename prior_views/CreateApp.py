@@ -83,7 +83,13 @@ class CreateApp:
         for setting in prior_settings:
             if setting.name != 'Add Prior Setting':
                 if setting.name == 'Prior Config Name:':
-                    model_name = setting.value
+                    if setting.value:
+                        model_name = setting.value
+                    else:
+                    # gets to here if no model config name given
+                    # add code that will prompt user to add name before resubmitting
+                    # could throw and catch exception 
+                        print('found empty value')
                 else:
                     new_config[setting.name] = setting.value
         self.prior_sliders[len(self.prior_sliders)-1].disabled = True
@@ -147,11 +153,11 @@ class CreateApp:
                             )
         for (key, val), (key2, val2) in zip(original_prior_args.items(), new_prior_args.items()):
             if val != 0:
-                # if val > 0 < 1:
-                #     d
                 upper_bound = val*3
                 lower_bound = val-(val*2)
             else:
+            # if value is 0 then cant change by multiplying value
+            # fixed at -50 50. might not be best solution but current fix
                 upper_bound = 50
                 lower_bound = -50
             sliders.append(
