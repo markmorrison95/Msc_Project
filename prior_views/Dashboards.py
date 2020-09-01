@@ -39,7 +39,7 @@ class PosteriorDashboard(param.Parameterized):
     data = param.Dict(precedence=-1)
     variable = param.Selector(None)
     plot_type = param.Selector(inputs_2, default=inputs_2[0], doc='Type of Plot:')
-    percentage = param.Number(default=100, bounds=(80,100), step=5, doc='Percentage of Data:')
+    percentage = param.Number(default=100, bounds=(10,100), step=10, doc='Percentage of Data:')
 
     @param.depends('variable', 'plot_type', 'data', 'percentage')
     def plot(self):

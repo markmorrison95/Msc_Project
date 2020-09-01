@@ -6,7 +6,7 @@ def color_gen():
     yield from itertools.cycle(Category10[10])
 
 colors = color_gen()
-data_percentages = [95, 90,85, 80]
+data_percentages = [90, 80,70, 60, 50, 40, 30, 20,10]
 
 class model:
     def __init__(self, model, data, model_kwargs:dict, name='prior'):
