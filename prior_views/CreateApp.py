@@ -72,41 +72,43 @@ class CreateApp:
 
 
 
+    name_empty_flag = False
+    name_empty_alert = pn.widgets.StaticText(value='Add Prior Name before Submitting')
 
-
-
-    def add_model(self, event, prior_settings):
+    def add_model(self, event, prior_settings, name):
         """ config from sliders being extracted into dict, ready to be passed as 
         kwargs into a new model """
-        new_config = {}
-        model_name = ""
-        for setting in prior_settings:
-            if setting.name != 'Add Prior Setting':
-                if setting.name == 'Prior Config Name:':
-                    if setting.value:
+        if not name.value:
+            if not self.name_empty_flag:
+                self.prior_sliders.append(self.name_empty_alert)
+                self.name_empty_flag = True
+        else:
+            if self.name_empty_flag:
+                self.prior_sliders.remove(self.name_empty_alert)
+                self.name_empty_flag = False
+
+            new_config = {}
+            model_name = ""
+            for setting in prior_settings:
+                if setting.name != 'Add Prior Setting':
+                    if setting.name == 'Prior Config Name:':
                         model_name = setting.value
                     else:
-                    # gets to here if no model config name given
-                    # add code that will prompt user to add name before resubmitting
-                    # could throw and catch exception 
-                        print('found empty value')
-                else:
-                    new_config[setting.name] = setting.value
-        self.prior_sliders[len(self.prior_sliders)-1].disabled = True
-        self.prior_sliders.append(
-            pn.widgets.Progress(
-                name='Sampling In Progress',
-                active=True,
-                bar_color='info',
-                width=300,
+                        new_config[setting.name] = setting.value
+            self.prior_sliders[len(self.prior_sliders)-1].disabled = True
+            self.prior_sliders.append(
+                pn.widgets.Progress(
+                    name='Sampling In Progress',
+                    active=True,
+                    bar_color='info',
+                    width=300,
+                )
             )
-        )
-        thread = Thread(
-            target=self.controls.add_new_model_config,
-            args=(new_config, model_name)
-        )
-        thread.start()
-        """ need to add method call for adding model config"""
+            thread = Thread(
+                target=self.controls.add_new_model_config,
+                args=(new_config, model_name)
+            )
+            thread.start()
 
 
 
@@ -177,8 +179,10 @@ class CreateApp:
 
     def model_selector_sliders(self, prior_args: dict):
         sliders = pn.Column()
-        sliders.append(pn.widgets.TextInput(
-            name='Prior Config Name:', placeholder=('eg. Prior 1')))
+        name_box = pn.widgets.TextInput(
+                name='Prior Config Name:', 
+                placeholder=('eg. Prior 1'))
+        sliders.append(name_box)
         for key, val in prior_args.items():
             if val != 0:
                 upper_bound = val*3
@@ -199,7 +203,7 @@ class CreateApp:
         button = pn.widgets.Button(
             name='Add Prior Setting', button_type='primary')
         button.on_click(functools.partial(
-            self.add_model, prior_settings=sliders))
+            self.add_model, prior_settings=sliders, name=name_box))
         # button.on_click(add_model)
         sliders.append(button)
         return sliders
