@@ -72,18 +72,30 @@ class CreateApp:
 
 
 
+
+
+
+    # ************* boolean flag and warning label for empty name when adding new config *********
+    """class variables so that flag is mantained outside of method and the alert message can
+        be easily removed from the display by removing from list by reference"""
     name_empty_flag = False
     name_empty_alert = pn.widgets.StaticText(value='Add Prior Name before Submitting')
+    # ********************************************************************************************
+
 
     def add_model(self, event, prior_settings, name):
         """ config from sliders being extracted into dict, ready to be passed as 
         kwargs into a new model """
         if not name.value:
+            # checking if name has been left blank
             if not self.name_empty_flag:
+                # checks if repeated offense. 
+                # If not will display warning, otherwise warning will just remain in place
                 self.prior_sliders.append(self.name_empty_alert)
                 self.name_empty_flag = True
         else:
             if self.name_empty_flag:
+            # checks for empty name warning. If exists removes the label and resets flag and then continues
                 self.prior_sliders.remove(self.name_empty_alert)
                 self.name_empty_flag = False
 
