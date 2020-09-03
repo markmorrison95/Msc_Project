@@ -75,17 +75,33 @@ class CreateApp:
 
 
 
-    # ************* boolean flag and warning label for empty name when adding new config *********
+    # ************* boolean flag and warning label for empty name and sampling failed *********
     """class variables so that flag is mantained outside of method and the alert message can
         be easily removed from the display by removing from list by reference"""
     name_empty_flag = False
     name_empty_alert = pn.widgets.StaticText(value='Add Prior Name before Submitting')
+
+    sampling_failed_flag = False
+    sampling_failed_alert = pn.widgets.StaticText(value='Sampling failed, try another config')
     # ********************************************************************************************
+
+    # ******* loading bar for when sampling is taking place *******
+    loading_bar = pn.widgets.Progress(
+                    name='Sampling In Progress',
+                    active=True,
+                    bar_color='info',
+                    width=300,)
+    # **************************************************************
+
+
 
 
     def add_model(self, event, prior_settings, name):
         """ config from sliders being extracted into dict, ready to be passed as 
         kwargs into a new model """
+        if self.sampling_failed_flag:
+            self.prior_sliders.remove(self.sampling_failed_alert)
+            self.sampling_failed_flag = False
         if not name.value:
             # checking if name has been left blank
             if not self.name_empty_flag:
@@ -107,20 +123,20 @@ class CreateApp:
                         model_name = setting.value
                     else:
                         new_config[setting.name] = setting.value
-            self.prior_sliders[len(self.prior_sliders)-1].disabled = True
-            self.prior_sliders.append(
-                pn.widgets.Progress(
-                    name='Sampling In Progress',
-                    active=True,
-                    bar_color='info',
-                    width=300,
-                )
-            )
+            self.button.disabled = True
+            self.prior_sliders.append(self.loading_bar)
             thread = Thread(
                 target=self.controls.add_new_model_config,
                 args=(new_config, model_name)
             )
             thread.start()
+
+
+    def sampling_failed(self):
+        self.prior_sliders.remove(self.loading_bar)
+        self.prior_sliders.append(self.sampling_failed_alert)
+        self.sampling_failed_flag = True
+        self.button.disabled = False
 
 
 
@@ -188,6 +204,8 @@ class CreateApp:
 
 
 
+    button = pn.widgets.Button(
+            name='Add Prior Setting', button_type='primary')
 
     def model_selector_sliders(self, prior_args: dict):
         sliders = pn.Column()
@@ -212,12 +230,10 @@ class CreateApp:
                                     )
                             )
 
-        button = pn.widgets.Button(
-            name='Add Prior Setting', button_type='primary')
-        button.on_click(functools.partial(
+        self.button.on_click(functools.partial(
             self.add_model, prior_settings=sliders, name=name_box))
         # button.on_click(add_model)
-        sliders.append(button)
+        sliders.append(self.button)
         return sliders
 
 
