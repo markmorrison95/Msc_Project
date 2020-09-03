@@ -53,10 +53,11 @@ class PosteriorDashboard(param.Parameterized):
 class posterior_predictive_Dashboard(param.Parameterized):
     data = param.Dict(precedence=-1)
     variable = param.Selector(None)
+    percentage = param.Number(default=100, bounds=(10,100), step=10, doc='Percentage of Data:')
 
-    @param.depends('variable', 'data')
+    @param.depends('variable', 'data', 'percentage')
     def plot(self):
-        return posterior_predictive_density_plot(variable=self.variable, data=self.data)
+        return posterior_predictive_density_plot(variable=self.variable, data=self.data, percent=self.percentage)
 
     def panel(self):
         return pn.Row(self.param, self.plot, sizing_mode='scale_both')

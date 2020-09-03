@@ -230,16 +230,20 @@ def posterior_density_plot(variable, data, percent, plottype, plot='posterior'):
 
 # *************** function for creating PPC plots *******************************
 @individual_plot_cache
-def plot_call_ppc(group, key, var, value):
+def plot_call_ppc(group, key, var, value, percent=100):
     """ using seperated function to allow for plot caching. Used for both prior and posterior
     KDE plots. If the key, var combo has already been called for that group the plot 
     will be retrieved from cache.
     
     @group should be either prior or posterior """
+    if group == 'posterior':
+        data = value.posterior_predictive[percent]
+    else:
+        data = value.model_arviz_data
     kwg = dict(height=350, width=500)
     # x_axis_range, y_axis_range = [],[]
     plot = az.plot_ppc(
-        value.model_arviz_data, 
+        data, 
         group=group, 
         var_names=var, 
         backend='bokeh',
@@ -285,12 +289,12 @@ def prior_predictive_density_plot(variable, data, plot='prior_predictive'):
 
 @without_document_lock
 @plot_cache
-def posterior_predictive_density_plot(variable, data, plot='posterior_predictive'):
+def posterior_predictive_density_plot(variable, data, percent, plot='posterior_predictive',):
     plots = []
     x_axis_range, y_axis_range = [],[]
     kwg = dict(height=350, width=500)
     for key, value in data.items():
-        plot = plot_call_ppc(group='posterior', key=key, var=variable, value=value)
+        plot = plot_call_ppc(group='posterior', key=key, var=variable, value=value, percent=percent)
         plots.append(row(plot[0].tolist()))
     col = column(plots)
     return col
