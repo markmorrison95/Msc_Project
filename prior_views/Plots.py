@@ -247,6 +247,7 @@ def plot_call_ppc(group, key, var, value):
         show=False,
         backend_kwargs=kwg,
         num_pp_samples=250,
+        legend=True,
     )
     for p in plot[0]:
         # setting the title of the plots so have the config name at the start
