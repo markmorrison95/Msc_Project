@@ -4,6 +4,7 @@ import bokeh.plotting as bkp
 from bokeh.models import Legend
 from bokeh.layouts import column, row
 import arviz as az
+import numpy as np
 from bokeh.document import without_document_lock
 import sys
 
@@ -330,18 +331,32 @@ def sample_trace_plot(variable, data, plot='sample_trace'):
     return col
 
 def compare_plot(data):
-    model_data = {}
-    for key, value in data.items():
-        model_data[key] = value.model_arviz_data
-    comp = az.compare(
-            model_data, 
-            ic='waic'
-            )
-    plot = az.plot_compare(
-        comp,
-        backend='bokeh',
-        show=False,
-        )
+    return None
+    # model_data = {}
+    # for key, value in data.items():
+    #     model_data[key] = value.model_arviz_data
+    # comp = az.compare(
+    #         model_data, 
+    #         ic='waic',
+    #         )
+    # print(comp)
+    # comp.replace([np.inf, -np.inf], np.nan)
+    # for index, row in comp.iterrows():
+    #     if row.isnull().values.any():
+    #         comp.drop(index, inplace=True)
+    # print(comp)
+    # if comp.size < 1:
+    #     return pn.widgets.StaticText(name='Unable to Compute WAIC for any Models')
+
+    # else:
+    #     print('trying to plot')
+    #     plot = az.plot_compare(
+    #         comp,
+    #         backend='bokeh',
+    #         show=False,
+    #         )
+    #     pn.serve(plot)
+    #     return pn.Column(plot)
 
 
 
