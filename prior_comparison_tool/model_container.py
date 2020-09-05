@@ -1,4 +1,5 @@
 from prior_comparison_tool.model import model
+import arviz as az
 
 class modelContainer:
     def __init__(self, model:model):
@@ -34,3 +35,13 @@ class modelContainer:
 
     def posterior_variables(self):
         return self.original_model.posterior_variables()
+
+    def compare_waic(self):
+        model_data = {}
+        for key, value in self.models_dict.items():
+            model_data[key] = value.model_arviz_data
+        comp = az.compare(
+            model_data, 
+            ic='waic'
+            )
+        return comp

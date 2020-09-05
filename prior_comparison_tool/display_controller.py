@@ -1,4 +1,4 @@
-from prior_comparison_tool.dashboards import priorDashboard, posteriorDashboard, sampleTraceDashboard, priorPredictiveDashboard, posteriorPredictiveDashboard
+from prior_comparison_tool.dashboards import priorDashboard, posteriorDashboard, sampleTraceDashboard, priorPredictiveDashboard, posteriorPredictiveDashboard, waicCompareDashboard
 from tornado.ioloop import IOLoop
 import panel as pn
 import param
@@ -55,12 +55,18 @@ class displayController:
             )
         self.sample_trace.param.variable.objects = posterior_vars
         self.sample_trace.set_default(param_name='variable', value=posterior_vars[0])
+
+        self.waic_comapre = waicCompareDashboard(
+            name='WAIC Compare Dashboard',
+            data=self.models.models_dict,
+        )
         dashboard = pn.Tabs(
             ('Prior', self.prior.panel().servable()),
             ('Prior Predictive', self.prior_predictive.panel().servable()),
             ('Posterior', self.posterior.panel().servable()),
             ('Posterior Predictive', self.posterior_predictive.panel().servable()),
             ('Sample Trace', self.sample_trace.panel().servable()),
+            ('WAIC Compare', self.waic_comapre.panel().servable()),
         )
         m_kwars = self.models.models_dict['Original'].model_kwargs
         self.prior_sliders = self.model_selector_sliders(m_kwars)
@@ -168,6 +174,8 @@ class displayController:
         self.posterior.param.trigger(*pram)
         self.posterior_predictive.param.trigger(*pram)
         self.sample_trace.param.trigger(*pram)
+        ar = ['data']
+        self.waic_comapre.param.trigger(*ar)
         # *******************************************************************************
         
 

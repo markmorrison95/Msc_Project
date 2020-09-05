@@ -329,6 +329,20 @@ def sample_trace_plot(variable, data, plot='sample_trace'):
     col = column(plots)
     return col
 
+def compare_plot(data):
+    model_data = {}
+    for key, value in data.items():
+        model_data[key] = value.model_arviz_data
+    comp = az.compare(
+            model_data, 
+            ic='waic'
+            )
+    plot = az.plot_compare(
+        comp,
+        backend='bokeh',
+        show=False,
+        )
+
 
 
     
