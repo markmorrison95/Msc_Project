@@ -12,8 +12,8 @@ import sys
 def prior_same_plot_list_cache(func):
     """
     Caches the list of the prior values created to allow the different model configs
-    to be plotted on the same fig.
-    Marginal gains, altough should be useful as more prior configs added
+    to be plotted on the same figure.
+    Marginal gains, although should be useful as more prior configs added
     """
     cache = {}
     def wrapped(model_dict):
