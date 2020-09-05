@@ -3,7 +3,6 @@ import pymc3 as pm
 import random
 import numpy as np
 import pandas as pd
-
 import logging
 
 # removes pymc3 sampling output apart from errors

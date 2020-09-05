@@ -9,47 +9,34 @@ import sys
 
 
 
-def prior_same_plot_list_cache(func):
+def same_plot_list_cache(func):
     """
     Caches the list of the prior values created to allow the different model configs
-    to be plotted on the same fig.
-    Marginal gains, altough should be useful as more prior configs added
+    to be plotted on the same figure.
+    Marginal gains, although should be useful as more prior configs added
     """
     cache = {}
-    def wrapped(model_dict):
-        args = str(len(model_dict))
+    def wrapped(**kwargs):
+        args = str(len(kwargs['model_dict'].keys()))
+        if 'percent' in kwargs:
+            args+= str(kwargs['percent'])
         if args in cache:
             return cache[args]
         else:
-            val = func(model_dict)
+            val = func(**kwargs)
             cache[args] = val
             return val
     return wrapped
 
-@prior_same_plot_list_cache
+@same_plot_list_cache
 def priors_same_plot_list(model_dict):
     data_list = []
     for model in model_dict.values():
         data_list.append(model.model_arviz_data)
     return data_list
 
-def posterior_same_plot_list_cache(func):
-    """
-    Caches the list of the posterior values created based of the percentage request
-    Marginal gains, altough may be useful as more prior configs added
-    """
-    cache = {}
-    def wrapped(model_dict, percent):
-        args = str(model_dict.keys()) + str(percent)
-        if args in cache:
-            return cache[args]
-        else:
-            val = func(model_dict, percent)
-            cache[args] = val
-            return val
-    return wrapped
 
-@posterior_same_plot_list_cache
+@same_plot_list_cache
 def posteriors_same_plot_list(model_dict, percent):
     data_list = []
     for model in model_dict.values():
@@ -165,7 +152,7 @@ def prior_density_plot(variable, data, plottype, plot='prior'):
     else:
         kwg = dict(height=450, width=650,toolbar_location='right')
         plot = az.plot_density(
-            priors_same_plot_list(data), 
+            priors_same_plot_list(model_dict=data), 
             group='prior', 
             var_names=variable,
             outline=False,  
@@ -208,7 +195,7 @@ def posterior_density_plot(variable, data, percent, plottype, plot='posterior'):
     else:
         kwg = dict(height=450, width=650,toolbar_location='right')
         plot = az.plot_density(
-            posteriors_same_plot_list(data, percent), 
+            posteriors_same_plot_list(model_dict=data, percent=percent), 
             group='posterior', 
             var_names=variable, 
             backend='bokeh',
@@ -230,16 +217,20 @@ def posterior_density_plot(variable, data, percent, plottype, plot='posterior'):
 
 # *************** function for creating PPC plots *******************************
 @individual_plot_cache
-def plot_call_ppc(group, key, var, value):
+def plot_call_ppc(group, key, var, value, percent=100):
     """ using seperated function to allow for plot caching. Used for both prior and posterior
     KDE plots. If the key, var combo has already been called for that group the plot 
     will be retrieved from cache.
     
     @group should be either prior or posterior """
+    if group == 'posterior':
+        data = value.posterior_predictive[percent]
+    else:
+        data = value.model_arviz_data
     kwg = dict(height=350, width=500)
     # x_axis_range, y_axis_range = [],[]
     plot = az.plot_ppc(
-        value.model_arviz_data, 
+        data, 
         group=group, 
         var_names=var, 
         backend='bokeh',
@@ -285,12 +276,12 @@ def prior_predictive_density_plot(variable, data, plot='prior_predictive'):
 
 @without_document_lock
 @plot_cache
-def posterior_predictive_density_plot(variable, data, plot='posterior_predictive'):
+def posterior_predictive_density_plot(variable, data, percent, plot='posterior_predictive',):
     plots = []
     x_axis_range, y_axis_range = [],[]
     kwg = dict(height=350, width=500)
     for key, value in data.items():
-        plot = plot_call_ppc(group='posterior', key=key, var=variable, value=value)
+        plot = plot_call_ppc(group='posterior', key=key, var=variable, value=value, percent=percent)
         plots.append(row(plot[0].tolist()))
     col = column(plots)
     return col
