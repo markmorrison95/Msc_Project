@@ -1,6 +1,6 @@
-from prior_views.model import model
+from prior_comparison_tool.model import model
 
-class model_container:
+class modelContainer:
     def __init__(self, model:model):
         self.original_model = model
         self.models_dict = {model.name:model}

@@ -1,6 +1,6 @@
-from prior_views.model import model
-from prior_views.models_container import model_container
-from prior_views.main_controls import Main_controls
+from prior_comparison_tool.model import model
+from prior_comparison_tool.model_container import modelContainer
+from prior_comparison_tool.display_container_interaction import displayContainerInteraction
 import pandas as pd
 import itertools
 import threading
@@ -23,14 +23,14 @@ def animate():
 
 
 
-def app_view(model_method, data, **prior_kwargs):
+def create_app(model_method, data, **prior_kwargs):
     if not isinstance(data, pd.DataFrame or isinstance(data, pd.Series)):
         raise TypeError("Only Pandas DataFrame or Series allowed")
     else:
         thread = threading.Thread(target=animate)
         thread.start()
         start_model = model(model_method, data, prior_kwargs, name='Original')
-        controls = Main_controls(start_model)
+        controls = displayContainerInteraction(start_model)
         global done
         done = True
         return controls.app.prior_checking_tool()

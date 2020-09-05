@@ -1,7 +1,7 @@
 import pymc3 as pm
-from prior_views.app import app_view
+from prior_comparison_tool.main import create_app
 import pandas as pd
-from prior_views.model import model
+from prior_comparison_tool.model import model
 
 
 def model_method(data, **prior_params):
@@ -26,4 +26,4 @@ params= {
 
 
 # m = model(model_method, data, params)
-app_view(model_method, data, **params)
+create_app(model_method, data, **params)
