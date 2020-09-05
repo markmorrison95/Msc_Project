@@ -9,7 +9,7 @@ from bokeh.plotting import curdoc
 inputs_2 = ['Separate Plots','Same Plot' ]
 
 
-class PriorDashboard(param.Parameterized):
+class prior_dashboard(param.Parameterized):
     # precedence less than one means it is not a user displayed option. Set through initial params passed
     data = param.Dict(precedence=-1)
     variable = param.Selector(None)
@@ -23,7 +23,7 @@ class PriorDashboard(param.Parameterized):
         return pn.Row(self.param, self.plot, sizing_mode='scale_both')
 
 
-class PriorPredictiveDashboard(param.Parameterized):
+class prior_predictive_dashboard(param.Parameterized):
     data = param.Dict(precedence=-1)
     variable = param.Selector(None)
 
@@ -50,7 +50,7 @@ class PosteriorDashboard(param.Parameterized):
         return pn.Row(self.param, self.plot, sizing_mode='scale_both')
 
 
-class posterior_predictive_Dashboard(param.Parameterized):
+class posterior_predictive_dashboard(param.Parameterized):
     data = param.Dict(precedence=-1)
     variable = param.Selector(None)
     percentage = param.Number(default=100, bounds=(10,100), step=10, doc='Percentage of Data:')

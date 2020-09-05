@@ -19,6 +19,7 @@ def animate():
         sys.stdout.flush()
         time.sleep(0.1)
     sys.stdout.write('\r\n')
+    sys.stdout.flush()
 
 
 

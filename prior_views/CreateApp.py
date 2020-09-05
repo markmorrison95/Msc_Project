@@ -1,4 +1,4 @@
-from prior_views.Dashboards import PriorDashboard, PosteriorDashboard, sample_trace_dashboard, PriorPredictiveDashboard, posterior_predictive_Dashboard
+from prior_views.Dashboards import prior_dashboard, PosteriorDashboard, sample_trace_dashboard, prior_predictive_dashboard, posterior_predictive_dashboard
 from tornado.ioloop import IOLoop
 import panel as pn
 import param
@@ -26,41 +26,41 @@ class CreateApp:
         posterior_vars = self.models.original_model.posterior_variables()
         prior_predictive_vars = self.models.original_model.prior_predictive_variables()
         posterior_predictive_vars = self.models.original_model.posterior_predictive_variables()
-        self.prior = PriorDashboard(name='Prior_Dashboard',
+        self.prior = prior_dashboard(name='Prior Distribution Dashboard',
                                data=self.models.models_dict,
                                )
         self.prior.param.variable.objects = prior_vars
         self.prior.set_default(param_name='variable', value=prior_vars[0])
-        self.prior_predictive = PriorPredictiveDashboard(
-            name='Prior_Predictive_Dashboard',
+        self.prior_predictive = prior_predictive_dashboard(
+            name='Prior Predictive Dashboard',
             data=self.models.models_dict,
             )
         self.prior_predictive.param.variable.objects = prior_predictive_vars
         self.prior_predictive.set_default(param_name='variable', value=prior_predictive_vars[0])
         self.posterior = PosteriorDashboard(
-            name='Posterior_Dashboard', 
+            name='Posterior Distribution Dashboard', 
             data=self.models.models_dict
             )
         self.posterior.param.variable.objects = posterior_vars
         self.posterior.set_default(param_name='variable', value=posterior_vars[0])
-        self.posterior_predictive = posterior_predictive_Dashboard(
-            name= 'posterior_predictive_dashboard',
+        self.posterior_predictive = posterior_predictive_dashboard(
+            name= 'Posterior Predictive Dashboard',
             data=self.models.models_dict,
             )
         self.posterior_predictive.param.variable.objects = posterior_predictive_vars
         self.posterior_predictive.set_default(param_name='variable', value=posterior_predictive_vars[0])
         self.sample_trace = sample_trace_dashboard(
-            name='sample_trace_dashboard',
+            name='Sample Trace Dashboard',
             data=self.models.models_dict,
             )
         self.sample_trace.param.variable.objects = posterior_vars
         self.sample_trace.set_default(param_name='variable', value=posterior_vars[0])
         dashboard = pn.Tabs(
             ('Prior', self.prior.panel().servable()),
-            ('Prior_Predictive', self.prior_predictive.panel().servable()),
+            ('Prior Predictive', self.prior_predictive.panel().servable()),
             ('Posterior', self.posterior.panel().servable()),
-            ('Posterior_Predictive', self.posterior_predictive.panel().servable()),
-            ('Sample_Trace', self.sample_trace.panel().servable()),
+            ('Posterior Predictive', self.posterior_predictive.panel().servable()),
+            ('Sample Trace', self.sample_trace.panel().servable()),
         )
         m_kwars = self.models.models_dict['Original'].model_kwargs
         self.prior_sliders = self.model_selector_sliders(m_kwars)
@@ -265,7 +265,7 @@ class CreateApp:
     def prior_checking_tool(self):
         loop = IOLoop().current()
         args = {'optional argument': '--dev'}
-        server = pn.serve(self.r, show=False, loop=loop, start=False, **args)
+        server = pn.serve(self.r, show=False, title='Prior Comparison Tool', loop=loop, start=False, **args)
         # nest_asyncio required because if opening in jupyter notebooks, IOloop is already in use
         nest_asyncio.apply()
         return server.run_until_shutdown()
