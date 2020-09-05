@@ -11,7 +11,7 @@ class displayContainerInteraction:
 
     def __init__(self, model):
         self.models = modelContainer(model)
-        self.app = displayController(controls=self, models=self.models)
+        self.app = displayController(interaction_controller=self, models=self.models)
 
 
     def add_new_model_config(self, prior_args:dict, name:str):
