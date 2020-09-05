@@ -1,13 +1,17 @@
-from prior_views.models_container import model_container
-from prior_views.CreateApp import CreateApp
+from prior_comparison_tool.model_container import modelContainer
+from prior_comparison_tool.display_controller import displayController
 from pymc3.exceptions import SamplingError
 
 
-class Main_controls:
+class displayContainerInteraction:
+    """
+    allows for callback to display_controller when adding a new model config 
+    while avoiding circular inputs
+    """
 
     def __init__(self, model):
-        self.models = model_container(model)
-        self.app = CreateApp(controls=self, models=self.models)
+        self.models = modelContainer(model)
+        self.app = displayController(controls=self, models=self.models)
 
 
     def add_new_model_config(self, prior_args:dict, name:str):

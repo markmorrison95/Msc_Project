@@ -1,17 +1,17 @@
-from prior_views.Dashboards import prior_dashboard, PosteriorDashboard, sample_trace_dashboard, prior_predictive_dashboard, posterior_predictive_dashboard
+from prior_comparison_tool.dashboards import priorDashboard, posteriorDashboard, sampleTraceDashboard, priorPredictiveDashboard, posteriorPredictiveDashboard
 from tornado.ioloop import IOLoop
 import panel as pn
 import param
 import nest_asyncio
 import functools
 import webbrowser
-from prior_views.models_container import model_container
+from prior_comparison_tool.model_container import modelContainer
 from threading import Thread
 
 
-class CreateApp:
-    def __init__(self, controls, models: model_container):
-        self.controls = controls
+class displayController:
+    def __init__(self, interaction_controller, models: modelContainer):
+        self.controls = interaction_controller
         self.models = models
         """
         Pulls together the components required to create each tab
@@ -26,30 +26,30 @@ class CreateApp:
         posterior_vars = self.models.original_model.posterior_variables()
         prior_predictive_vars = self.models.original_model.prior_predictive_variables()
         posterior_predictive_vars = self.models.original_model.posterior_predictive_variables()
-        self.prior = prior_dashboard(name='Prior Distribution Dashboard',
+        self.prior = priorDashboard(name='Prior Distribution Dashboard',
                                data=self.models.models_dict,
                                )
         self.prior.param.variable.objects = prior_vars
         self.prior.set_default(param_name='variable', value=prior_vars[0])
-        self.prior_predictive = prior_predictive_dashboard(
+        self.prior_predictive = priorPredictiveDashboard(
             name='Prior Predictive Dashboard',
             data=self.models.models_dict,
             )
         self.prior_predictive.param.variable.objects = prior_predictive_vars
         self.prior_predictive.set_default(param_name='variable', value=prior_predictive_vars[0])
-        self.posterior = PosteriorDashboard(
+        self.posterior = posteriorDashboard(
             name='Posterior Distribution Dashboard', 
             data=self.models.models_dict
             )
         self.posterior.param.variable.objects = posterior_vars
         self.posterior.set_default(param_name='variable', value=posterior_vars[0])
-        self.posterior_predictive = posterior_predictive_dashboard(
+        self.posterior_predictive = posteriorPredictiveDashboard(
             name= 'Posterior Predictive Dashboard',
             data=self.models.models_dict,
             )
         self.posterior_predictive.param.variable.objects = posterior_predictive_vars
         self.posterior_predictive.set_default(param_name='variable', value=posterior_predictive_vars[0])
-        self.sample_trace = sample_trace_dashboard(
+        self.sample_trace = sampleTraceDashboard(
             name='Sample Trace Dashboard',
             data=self.models.models_dict,
             )

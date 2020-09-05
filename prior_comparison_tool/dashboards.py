@@ -1,6 +1,5 @@
 import param
-from prior_views.Plots import prior_density_plot, posterior_density_plot, prior_predictive_density_plot, posterior_predictive_density_plot, sample_trace_plot
-from prior_views.DisasterModel import CreateModel
+from prior_comparison_tool.plots import prior_density_plot, posterior_density_plot, prior_predictive_density_plot, posterior_predictive_density_plot, sample_trace_plot
 import panel as pn
 from tornado import gen
 from bokeh.plotting import curdoc
@@ -9,7 +8,7 @@ from bokeh.plotting import curdoc
 inputs_2 = ['Separate Plots','Same Plot' ]
 
 
-class prior_dashboard(param.Parameterized):
+class priorDashboard(param.Parameterized):
     # precedence less than one means it is not a user displayed option. Set through initial params passed
     data = param.Dict(precedence=-1)
     variable = param.Selector(None)
@@ -23,7 +22,7 @@ class prior_dashboard(param.Parameterized):
         return pn.Row(self.param, self.plot, sizing_mode='scale_both')
 
 
-class prior_predictive_dashboard(param.Parameterized):
+class priorPredictiveDashboard(param.Parameterized):
     data = param.Dict(precedence=-1)
     variable = param.Selector(None)
 
@@ -35,7 +34,7 @@ class prior_predictive_dashboard(param.Parameterized):
         return pn.Row(self.param, self.plot, sizing_mode='scale_both')
 
 
-class PosteriorDashboard(param.Parameterized):
+class posteriorDashboard(param.Parameterized):
     data = param.Dict(precedence=-1)
     variable = param.Selector(None)
     plot_type = param.Selector(inputs_2, default=inputs_2[0], doc='Type of Plot:')
@@ -50,7 +49,7 @@ class PosteriorDashboard(param.Parameterized):
         return pn.Row(self.param, self.plot, sizing_mode='scale_both')
 
 
-class posterior_predictive_dashboard(param.Parameterized):
+class posteriorPredictiveDashboard(param.Parameterized):
     data = param.Dict(precedence=-1)
     variable = param.Selector(None)
     percentage = param.Number(default=100, bounds=(10,100), step=10, doc='Percentage of Data:')
@@ -63,7 +62,7 @@ class posterior_predictive_dashboard(param.Parameterized):
         return pn.Row(self.param, self.plot, sizing_mode='scale_both')
 
 
-class sample_trace_dashboard(param.Parameterized):
+class sampleTraceDashboard(param.Parameterized):
     data = param.Dict(precedence=-1)
     variable = param.Selector(None)
 
