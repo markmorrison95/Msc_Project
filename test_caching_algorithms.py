@@ -2,33 +2,16 @@ import pymc3 as pm
 from prior_comparison_tool.main import create_app
 import pandas as pd
 from prior_comparison_tool.model import model
-from prior_comparison_tool.plots import prior_density_plot, posterior_density_plot
+from prior_comparison_tool.plots import prior_density_plot, posterior_density_plot, posterior_predictive_density_plot, prior_predictive_density_plot, sample_trace_plot
 import unittest
 import timeit
 import numpy as np
 
-
-# def model_method(data, **prior_params):
-#     with pm.Model() as model:
-#         mu = pm.Normal("mu", mu=prior_params['height_mean_mu'], sd=prior_params['height_mean_sd'])
-#         sigma = pm.Uniform("sigma", lower=prior_params['sd_lower'], upper=prior_params['sd_upper'])
-#         height = pm.Normal("height", mu=mu, sd=sigma, observed=data.height)
-
-#     return model
-
-# d = pd.read_csv("Howell1.csv", sep=";", header=0)
-# data = d[d.age >= 18]
-
-# params= {
-#     'height_mean_mu':178,
-#     'height_mean_sd':20,
-#     'sd_lower':0,
-#     'sd_upper':50,
-# }
-
 RANDOM_SEED = 8927
 np.random.seed(RANDOM_SEED)
 
+
+# *********************** model taken from https://docs.pymc.io/notebooks/getting_started.html ******************
 # True parameter values
 alpha, sigma = 1, 1
 beta = [1, 2.5]
@@ -45,8 +28,6 @@ data = pd.DataFrame()
 data['Y'] = Y
 data['X1'] = X1
 data['X2'] = X2
-
-
 
 def model_method(data, **prior_params):
     with pm.Model() as test_model:
@@ -81,27 +62,122 @@ params2= {
 
 
 class testCacheingAlgorithms(unittest.TestCase):
+    """
+    A series of unit test evaluating the effectiveness of cacheing algorithms implemented in the plot class.
+    All methods are evaluated by testing an initial call vs a second call with the same parameters whose
+    response should have been cached. Evaluated on response time, second call must be faster to pass as this
+    is the purpose of implementing the algorithms.
+    
+    """
 
-    model = model(model=model_method, data = data, model_kwargs=params)
+    model1 = model(model=model_method, data = data, model_kwargs=params)
     model2 = model(model=model_method, data = data, model_kwargs=params2)
-    test_dict_one_model = {'model1':model}
-    test_dict_two_models = {'model1':model, 'model2':model2}
+    test_dict_one_model = {'model1':model1}
+    test_dict_two_models = {'model1':model1, 'model2':model2}
 
     def test_individual_plot_cache_prior(self):
-        """ A test for checking that the cacheing of individual plots on prior works """
+        """ A test for checking that the cacheing of individual plots on prior works.
+            Tests both the separate and same plot functions. """
         def prior_funtion_call():
             return prior_density_plot(variable='alpha', data=self.test_dict_one_model, plottype='Separate Plots')
+
         time1 = timeit.timeit(prior_funtion_call, number=1)
         time2 = timeit.timeit(prior_funtion_call, number=1)
-        self.assertLess(time2, time1, "The cache for individual prior density plot has not improved call time")
+        self.assertLess(time2, time1, "The cache for individual prior density plot  - type: separate plot - has not improved call time")
+
+        def prior_funtion_same_plot_call():
+            return prior_density_plot(variable='alpha', data=self.test_dict_one_model, plottype='Same Plot')
+
+        time1same = timeit.timeit(prior_funtion_same_plot_call, number=1)
+        time2same = timeit.timeit(prior_funtion_same_plot_call, number=1)
+        self.assertLess(time2same, time1same, "The cache for individual prior density plot - type: same plot - has not improved call time")
 
     def test_individual_plot_cache_posterior(self):
-        """ A test for checking that the cacheing of individual plots on posterior works """
+        """ A test for checking that the cacheing of individual plots on posterior works. 
+            Tests both the separate and same plot functions.  """
         def posterior_funtion_call():
             return posterior_density_plot(variable='alpha', data=self.test_dict_one_model, plottype='Separate Plots', percent=100)
+
         time1 = timeit.timeit(posterior_funtion_call, number=1)
         time2 = timeit.timeit(posterior_funtion_call, number=1)
-        self.assertLess(time2, time1, "The cache for individual posterior density plot has not improved call time")
+        self.assertLess(time2, time1, "The cache for individual posterior density plot - type: separate plot - has not improved call time")
+
+        def posterior_funtion_same_plot_call():
+            return posterior_density_plot(variable='alpha', data=self.test_dict_one_model, plottype='Same Plots', percent=100)
+
+        time1same = timeit.timeit(posterior_funtion_call, number=1)
+        time2same = timeit.timeit(posterior_funtion_call, number=1)
+        self.assertLess(time2same, time1same, "The cache for individual posterior density plot - type: same plot -  has not improved call time")
+
+
+    def test_individual_plot_cache_posterior_ppc(self):
+        """ A test for checking that the cacheing of individual plots on posterior ppc works. """
+        def posterior_ppc_funtion_call():
+            return posterior_predictive_density_plot(variable='Y_obs', data=self.test_dict_one_model, percent=100)
+        time1 = timeit.timeit(posterior_ppc_funtion_call, number=1)
+        time2 = timeit.timeit(posterior_ppc_funtion_call, number=1)
+        self.assertLess(time2, time1, "The cache for individual posterior ppc plot has not improved call time")
+    
+
+    def test_individual_plot_cache_prior_ppc(self):
+        """ A test for checking that the cacheing of individual plots on prior ppc works. """
+        def prior_ppc_funtion_call():
+            return prior_predictive_density_plot(variable='Y_obs', data=self.test_dict_one_model)
+        time1 = timeit.timeit(prior_ppc_funtion_call, number=1)
+        time2 = timeit.timeit(prior_ppc_funtion_call, number=1)
+        self.assertLess(time2, time1, "The cache for individual prior ppc plot has not improved call time")
+
+    def test_multiple_plot_cache_prior(self):
+        """ A test for checking that the caching of multiple plots on prior works. 
+            Tests both the separate and same plot functions.  """
+        def prior_funtion_call():
+            return prior_density_plot(variable='alpha', data=self.test_dict_two_models , plottype='Separate Plots')
+
+        time1 = timeit.timeit(prior_funtion_call, number=1)
+        time2 = timeit.timeit(prior_funtion_call, number=1)
+        self.assertLess(time2, time1, "The cache for multiple prior density plot  - type: separate plot - has not improved call time")
+
+        def prior_funtion_same_plot_call():
+            return prior_density_plot(variable='alpha', data=self.test_dict_two_models, plottype='Same Plot')
+
+        time1same = timeit.timeit(prior_funtion_same_plot_call, number=1)
+        time2same = timeit.timeit(prior_funtion_same_plot_call, number=1)
+        self.assertLess(time2same, time1same, "The cache for multiple prior density plot - type: same plot - has not improved call time")
+
+
+    def test_multiple_plot_cache_posterior(self):
+        """ A test for checking that the cacheing of multiple plots on posterior works. 
+            Tests both the separate and same plot functions.  """
+        def posterior_funtion_call():
+            return posterior_density_plot(variable='alpha', data=self.test_dict_two_models, plottype='Separate Plots', percent=100)
+
+        time1 = timeit.timeit(posterior_funtion_call, number=1)
+        time2 = timeit.timeit(posterior_funtion_call, number=1)
+        self.assertLess(time2, time1, "The cache for multiple posterior density plot - type: separate plot - has not improved call time")
+
+        def posterior_funtion_same_plot_call():
+            return posterior_density_plot(variable='alpha', data=self.test_dict_two_models, plottype='Same Plots', percent=100)
+
+        time1same = timeit.timeit(posterior_funtion_call, number=1)
+        time2same = timeit.timeit(posterior_funtion_call, number=1)
+        self.assertLess(time2same, time1same, "The cache for multiple posterior density plot - type: same plot -  has not improved call time")
+
+    def test_multiple_plot_cache_posterior_ppc(self):
+        """ A test for checking that the cacheing of multiple plots on posterior ppc works.  """
+        def posterior_ppc_funtion_call():
+            return posterior_predictive_density_plot(variable='Y_obs', data=self.test_dict_two_models, percent=100)
+        time1 = timeit.timeit(posterior_ppc_funtion_call, number=1)
+        time2 = timeit.timeit(posterior_ppc_funtion_call, number=1)
+        self.assertLess(time2, time1, "The cache for multiple posterior ppc plot has not improved call time")
+    
+    def test_multiple_plot_cache_prior_ppc(self):
+        """ A test for checking that the cacheing of multiple plots on prior ppc works """
+        def prior_ppc_funtion_call():
+            return prior_predictive_density_plot(variable='Y_obs', data=self.test_dict_two_models)
+        time1 = timeit.timeit(prior_ppc_funtion_call, number=1)
+        time2 = timeit.timeit(prior_ppc_funtion_call, number=1)
+        self.assertLess(time2, time1, "The cache for multiple prior ppc plot has not improved call time")
+
 
 suite = unittest.TestLoader().loadTestsFromTestCase(testCacheingAlgorithms)
 unittest.TextTestRunner(verbosity=2).run(suite)
