@@ -10,26 +10,26 @@ import sys
 
 
 
-def same_plot_list_cache(func):
-    """
-    Caches the list of the prior values created to allow the different model configs
-    to be plotted on the same figure.
-    Marginal gains, although should be useful as more prior configs added
-    """
-    cache = {}
-    def wrapped(**kwargs):
-        args = str(len(kwargs['model_dict'].keys()))
-        if 'percent' in kwargs:
-            args+= str(kwargs['percent'])
-        if args in cache:
-            return cache[args]
-        else:
-            val = func(**kwargs)
-            cache[args] = val
-            return val
-    return wrapped
+# def same_plot_list_cache(func):
+#     """
+#     Caches the list of the prior values created to allow the different model configs
+#     to be plotted on the same figure.
+#     Marginal gains, although should be useful as more prior configs added
+#     """
+#     cache = {}
+#     def wrapped(**kwargs):
+#         args = str(len(kwargs['model_dict'].keys()))
+#         if 'percent' in kwargs:
+#             args+= str(kwargs['percent'])
+#         if args in cache:
+#             return cache[args]
+#         else:
+#             val = func(**kwargs)
+#             cache[args] = val
+#             return val
+#     return wrapped
 
-@same_plot_list_cache
+# @same_plot_list_cache
 def priors_same_plot_list(model_dict):
     data_list = []
     for model in model_dict.values():
@@ -37,7 +37,7 @@ def priors_same_plot_list(model_dict):
     return data_list
 
 
-@same_plot_list_cache
+# @same_plot_list_cache
 def posteriors_same_plot_list(model_dict, percent):
     data_list = []
     for model in model_dict.values():
@@ -62,8 +62,7 @@ def plot_cache(func):
     cache = {}
     def wrapped(**kwargs):
         args = str(len(kwargs['data']))
-        for k in kwargs.values():
-            args += str(k)
+        args += str(list(kwargs.values()))
         if args in cache:
             return cache[args]
         else:
