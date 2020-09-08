@@ -59,7 +59,7 @@ def reduce_data_remove(data, fraction):
 
     Throws type error if pandas dataframe of dataseries not used. 
     """
-    if isinstance(data, pd.DataFrame or isinstance(data, pd.Series)):
+    if isinstance(data, pd.DataFrame) or isinstance(data, pd.Series):
         data = data.copy(deep=True)
         size = len(data)
         to_remove = int(size - (size*fraction))
