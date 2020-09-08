@@ -33,4 +33,4 @@ def create_app(model_method, data, **prior_kwargs):
         controls = displayContainerInteraction(start_model)
         global done
         done = True
-        return controls.app.prior_checking_tool()
+        return controls.app.start_server()

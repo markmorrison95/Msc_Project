@@ -10,11 +10,18 @@ from threading import Thread
 
 
 class displayController:
+    """
+        Main class for creating and mantaining application display. Pulls together the components required to create the complete application display. Is also the main method for 
+        controlling user input
+
+        Params:
+        @interaction_controller = display_container_interaction object
+        @models = modelContainer object. Contains all model data for the app
+         """
     def __init__(self, interaction_controller, models: modelContainer):
         self.controls = interaction_controller
         self.models = models
         """
-        Pulls together the components required to create each tab
         Initally pulls the variable names out of the original_model. In order to set the variable names for each dashboard
         the dashboard needs to be initialise and then have the param for variable edited with the values. This is the
         only way i could find to dynamically update with the variables as no way to pass to the class in a way that
@@ -50,7 +57,7 @@ class displayController:
         self.posterior_predictive.param.variable.objects = posterior_predictive_vars
         self.posterior_predictive.set_default(param_name='variable', value=posterior_predictive_vars[0])
         self.sample_trace = sampleTraceDashboard(
-            name='Sample Trace Dashboard',
+            name='MCMC Trace Dashboard',
             data=self.models.models_dict,
             )
         self.sample_trace.param.variable.objects = posterior_vars
@@ -65,7 +72,7 @@ class displayController:
             ('Prior Predictive', self.prior_predictive.panel().servable()),
             ('Posterior', self.posterior.panel().servable()),
             ('Posterior Predictive', self.posterior_predictive.panel().servable()),
-            ('Sample Trace', self.sample_trace.panel().servable()),
+            ('MCMC Trace', self.sample_trace.panel().servable()),
             ('WAIC Compare', self.waic_comapre.panel().servable()),
         )
         m_kwars = self.models.models_dict['Original'].model_kwargs
@@ -91,7 +98,11 @@ class displayController:
     sampling_failed_alert = pn.widgets.StaticText(value='Sampling failed, try another config')
     # ********************************************************************************************
 
+
+
     # ******* loading bar for when sampling is taking place *******
+    """mantained outside of method so can be added in one method 
+        and then removed in another by reference"""
     loading_bar = pn.widgets.Progress(
                     name='Sampling In Progress',
                     active=True,
@@ -124,7 +135,7 @@ class displayController:
             new_config = {}
             model_name = ""
             for setting in prior_settings:
-                if setting.name != 'Add Prior Setting':
+                if setting != self.button:
                     if setting.name == 'Prior Config Name:':
                         model_name = setting.value
                     else:
@@ -190,14 +201,8 @@ class displayController:
                                 )
                             )
         for (key, val), (key2, val2) in zip(original_prior_args.items(), new_prior_args.items()):
-            if val != 0:
-                upper_bound = val*3
-                lower_bound = val-(val*2)
-            else:
-            # if value is 0 then cant change by multiplying value
-            # fixed at -50 50. might not be best solution but current fix
-                upper_bound = 50
-                lower_bound = -50
+            upper_bound = val+100
+            lower_bound = val-100
             sliders.append(
                 pn.widgets.FloatSlider(
                     name=key,
@@ -213,7 +218,7 @@ class displayController:
 
 
     button = pn.widgets.Button(
-            name='Add Prior Setting', button_type='primary')
+            name='Add Prior Configuration', button_type='primary')
 
     def model_selector_sliders(self, prior_args: dict):
         sliders = pn.Column()
@@ -222,12 +227,8 @@ class displayController:
                 placeholder=('eg. Prior 1'))
         sliders.append(name_box)
         for key, val in prior_args.items():
-            if val != 0:
-                upper_bound = val*3
-                lower_bound = val-(val*2)
-            else:
-                upper_bound = 20
-                lower_bound = -20
+            upper_bound = val +100
+            lower_bound = val-100
             sliders.append(
                 pn.widgets.FloatSlider(
                                     name=key, 
@@ -265,16 +266,9 @@ class displayController:
             )
         return tabs
 
-
-
-
-
-
-    def prior_checking_tool(self):
+    def start_server(self):
         loop = IOLoop().current()
-        args = {'optional argument': '--dev'}
-        server = pn.serve(self.r, show=False, title='Prior Comparison Tool', loop=loop, start=False, **args)
+        server = pn.serve(self.r, show=False, title='Prior Comparison Tool', loop=loop, start=False)
         # nest_asyncio required because if opening in jupyter notebooks, IOloop is already in use
         nest_asyncio.apply()
         return server.run_until_shutdown()
-        # server.io_loop.start()

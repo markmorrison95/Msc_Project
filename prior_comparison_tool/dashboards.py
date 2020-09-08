@@ -75,11 +75,10 @@ class sampleTraceDashboard(param.Parameterized):
 
 class waicCompareDashboard(param.Parameterized):
     data = param.Dict(precedence=-1)
-    label = pn.widgets.StaticText(value='If Model Missing, Unable to compute WAIC')
 
     @param.depends('data')
     def plot(self):
         return compare_plot(data=self.data)
 
     def panel(self):
-        return pn.Row(pn.Column(self.label, self.param), self.plot, sizing_mode='scale_both')
+        return pn.Row(self.param, pn.Column(self.plot), sizing_mode='scale_both')
