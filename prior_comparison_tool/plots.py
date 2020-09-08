@@ -5,39 +5,15 @@ from bokeh.models import Legend
 from bokeh.layouts import column, row
 import arviz as az
 import numpy as np
+from bokeh.models import LegendItem, Legend
 from bokeh.document import without_document_lock
-import sys
 
-
-
-# def same_plot_list_cache(func):
-#     """
-#     Caches the list of the prior values created to allow the different model configs
-#     to be plotted on the same figure.
-#     Marginal gains, although should be useful as more prior configs added
-#     """
-#     cache = {}
-#     def wrapped(**kwargs):
-#         args = str(len(kwargs['model_dict'].keys()))
-#         if 'percent' in kwargs:
-#             args+= str(kwargs['percent'])
-#         if args in cache:
-#             return cache[args]
-#         else:
-#             val = func(**kwargs)
-#             cache[args] = val
-#             return val
-#     return wrapped
-
-# @same_plot_list_cache
 def priors_same_plot_list(model_dict):
     data_list = []
     for model in model_dict.values():
         data_list.append(model.model_arviz_data)
     return data_list
 
-
-# @same_plot_list_cache
 def posteriors_same_plot_list(model_dict, percent):
     data_list = []
     for model in model_dict.values():
@@ -141,14 +117,11 @@ def prior_density_plot(variable, data, plottype, plot='prior'):
     The parameters are the data, plottype, either "Seperate Plots" or "Same Plots" 
     Also takes the variable to view which will be chosen by the dropdown in the program. 
     """
+    plots = pn.Column(scroll=True, max_height=750, sizing_mode='stretch_both')
     if plottype == 'Separate Plots':
-        plots = pn.Column(scroll=True, max_height=750, sizing_mode='stretch_both')
-        x_axis_range, y_axis_range = [],[]
-
         for key, value in data.items():
             plot = plot_call_KDE(group='prior', key=key, var=variable, value=value)
             plots.append(row(plot[0].tolist()))
-        col = plots
     else:
         kwg = dict(height=450, width=650,toolbar_location='right')
         plot = az.plot_density(
@@ -168,8 +141,8 @@ def prior_density_plot(variable, data, plottype, plot='prior'):
             legend.location = (10,-10)
             legend.orientation = "vertical"
             p.add_layout(legend, place='right')
-        col = column(plot[0].tolist())
-    return col
+        plots.append(column(plot[0].tolist()))
+    return plots
 
 
 
@@ -184,14 +157,14 @@ def posterior_density_plot(variable, data, percent, plottype, plot='posterior'):
     Also takes the variable to view which will be chosen by the dropdown in the program. Requires a percentage which translates
     to a percentage of data used. This corresponds to the values set in the model objects
     """
+
+    plots = pn.Column(scroll=True, max_height=750, sizing_mode='stretch_both')
     if plottype == 'Separate Plots':
-        plots = []
         kwg = dict(height=250, width=550)
         x_axis_range, y_axis_range = [],[]
         for key,value in data.items():
             plot = plot_call_KDE(group='posterior', key=key, var=variable, value=value, percent=percent)
             plots.append(row(plot[0].tolist()))
-        col = column(plots)
     else:
         kwg = dict(height=450, width=650,toolbar_location='right')
         plot = az.plot_density(
@@ -211,8 +184,8 @@ def posterior_density_plot(variable, data, percent, plottype, plot='posterior'):
             legend.location = (10,-10)
             legend.orientation = "vertical"
             p.add_layout(legend, place='right')
-        col = column(plot[0].tolist())
-    return col
+        plots.append(column(plot[0].tolist()))
+    return plots
 
 
 # *************** function for creating PPC plots *******************************
@@ -240,12 +213,19 @@ def plot_call_ppc(group, key, var, value, percent=100):
         num_pp_samples=250,
         legend=True,
     )
+    total = len(plot[0,0].renderers)-1
+    li1 = LegendItem(label='Posterior Predictive Samples', renderers=[plot[0,0].renderers[total-2]])
+    li2 = LegendItem(label='Likelihood/Observed', renderers=[plot[0,0].renderers[total-1]])
+    li3 = LegendItem(label='Posterior Predictive Samples Mean', renderers=[plot[0,0].renderers[total]])
+    legend = Legend(items=[li1, li2, li3])
+    legend.location = (10,-10)
+    end_plot = plot[0][len(plot[0])-1]
+    end_plot.add_layout(legend, place='right')
+    end_plot.width = 800    
     for p in plot[0]:
         # setting the title of the plots so have the config name at the start
         # also changing the axis range so plots are linked at same range
         p.title.text = key+' '+p.title.text 
-        # p.x_range = x_axes
-        # p.y_range = y_axes
     return plot
 # ************************************************************************************
 
@@ -260,14 +240,13 @@ def plot_call_ppc(group, key, var, value, percent=100):
 @without_document_lock
 @plot_cache
 def prior_predictive_density_plot(variable, data, plot='prior_predictive'):
-    plots = []
+    plots = pn.Column(scroll=True, max_height=750, sizing_mode='stretch_both')
     kwg = dict(height=350, width=500)
     x_axis_range, y_axis_range = [],[]
     for key, value in data.items():
         plot = plot_call_ppc(group='prior', key=key, var=variable, value=value)
         plots.append(row(plot[0].tolist()))
-    col = column(plots)
-    return col
+    return plots
 
 
 
@@ -277,14 +256,13 @@ def prior_predictive_density_plot(variable, data, plot='prior_predictive'):
 @without_document_lock
 @plot_cache
 def posterior_predictive_density_plot(variable, data, percent, plot='posterior_predictive',):
-    plots = []
+    plots = pn.Column(scroll=True, max_height=750, sizing_mode='stretch_both')
     x_axis_range, y_axis_range = [],[]
     kwg = dict(height=350, width=500)
     for key, value in data.items():
         plot = plot_call_ppc(group='posterior', key=key, var=variable, value=value, percent=percent)
         plots.append(row(plot[0].tolist()))
-    col = column(plots)
-    return col
+    return plots
 
 
 
@@ -320,14 +298,13 @@ def plot_call_trace(group, key, var, value):
 @without_document_lock
 @plot_cache
 def sample_trace_plot(variable, data, plot='sample_trace'):
-    plots = []
+    plots = pn.Column(scroll=True, max_height=750, sizing_mode='stretch_both')
     kwg = dict(height=200)
     x_axis_range, y_axis_range = [],[]
     for key, value in data.items():
         plot = plot_call_trace(group='', key=key, var=variable, value=value)
         plots.append(row(plot[0].tolist()))
-    col = column(plots)
-    return col
+    return plots
 
 def compare_plot(data):
     model_data = {}
@@ -340,11 +317,9 @@ def compare_plot(data):
             )
     comp.replace([np.inf, -np.inf], np.nan)
     if comp.isnull().values.any():
-        print('cant compute')
         return pn.widgets.StaticText(name='', val='Data contains missing values so can\'t compute WAIC')
     
     elif comp.shape[0] < 2:
-        print('another model needed')
         return pn.widgets.StaticText(name='', value='Add another configuration to compare models')
 
     else:
@@ -354,7 +329,15 @@ def compare_plot(data):
                 backend='bokeh',
                 show=False,
                 backend_kwargs=kwg,
+                order_by_rank=True,
                 )
+        li1 = LegendItem(label='WAIC', renderers=[plot.renderers[2]])
+        li2 = LegendItem(label='Stadard Error', renderers=[plot.renderers[3]])
+        li3 = LegendItem(label='In-Sample Deviance', renderers=[plot.renderers[4]])
+        legend = Legend(items=[li1, li2, li3])
+        legend.location = (10,-10)
+        plot.add_layout(legend, place='right')
+        plot.width = 800
         return plot
 
 
