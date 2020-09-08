@@ -25,5 +25,4 @@ params= {
 }
 
 
-# m = model(model_method, data, params)
 create_app(model_method, data, **params)

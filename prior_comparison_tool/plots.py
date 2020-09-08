@@ -4,6 +4,7 @@ import bokeh.plotting as bkp
 from bokeh.models import Legend
 from bokeh.layouts import column, row
 import arviz as az
+import numpy as np
 from bokeh.document import without_document_lock
 import sys
 
@@ -223,12 +224,12 @@ def plot_call_ppc(group, key, var, value, percent=100):
     will be retrieved from cache.
     
     @group should be either prior or posterior """
+    color = value.color
     if group == 'posterior':
         data = value.posterior_predictive[percent]
     else:
         data = value.model_arviz_data
     kwg = dict(height=350, width=500)
-    # x_axis_range, y_axis_range = [],[]
     plot = az.plot_ppc(
         data, 
         group=group, 
@@ -328,6 +329,34 @@ def sample_trace_plot(variable, data, plot='sample_trace'):
         plots.append(row(plot[0].tolist()))
     col = column(plots)
     return col
+
+def compare_plot(data):
+    model_data = {}
+    for key, value in data.items():
+        model_data[key] = value.model_arviz_data
+    comp = az.compare(
+            model_data, 
+            ic='waic',
+            scale='log',
+            )
+    comp.replace([np.inf, -np.inf], np.nan)
+    if comp.isnull().values.any():
+        print('cant compute')
+        return pn.widgets.StaticText(name='', val='Data contains missing values so can\'t compute WAIC')
+    
+    elif comp.shape[0] < 2:
+        print('another model needed')
+        return pn.widgets.StaticText(name='', value='Add another configuration to compare models')
+
+    else:
+        kwg = dict(height=450, width=650,toolbar_location='right')
+        plot = az.plot_compare(
+                comp,
+                backend='bokeh',
+                show=False,
+                backend_kwargs=kwg,
+                )
+        return plot
 
 
 
