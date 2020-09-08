@@ -7,9 +7,10 @@ import unittest
 import timeit
 import numpy as np
 
+# python -m unittest discover <test_directory>
+
 RANDOM_SEED = 8927
 np.random.seed(RANDOM_SEED)
-
 
 # *********************** model taken from https://docs.pymc.io/notebooks/getting_started.html ******************
 # True parameter values
@@ -69,7 +70,7 @@ class testCacheingAlgorithms(unittest.TestCase):
     is the purpose of implementing the algorithms.
     
     """
-
+    print('building test models')
     model1 = model(model=model_method, data = data, model_kwargs=params)
     model2 = model(model=model_method, data = data, model_kwargs=params2)
     test_dict_one_model = {'model1':model1}

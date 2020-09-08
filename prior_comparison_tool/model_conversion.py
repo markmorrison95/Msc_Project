@@ -10,6 +10,10 @@ logger = logging.getLogger('pymc3')
 logger.setLevel(logging.ERROR)
 
 def convert_full_model(model):
+    """
+    Runs MCMC sampling on model provided and creates data for prior, posterior and PPC
+    packages data into ArviZ InferenceData object and returns that
+    """
     with model:
         trace = pm.sample(progressbar=False)
         prior = pm.sample_prior_predictive()
@@ -32,6 +36,11 @@ def convert_full_model(model):
     return data
 
 def convert_posterior_model(model):
+    """
+    Runs MCMC sampling on model provided and creates data for posterior and PPC
+    Does not produce prior data because not required
+    packages data into ArviZ InferenceData object and returns that
+    """
     with model:
         trace = pm.sample(progressbar=False)
         posterior = pm.sample_posterior_predictive(trace,progressbar=False)
