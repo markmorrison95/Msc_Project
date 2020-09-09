@@ -23,7 +23,7 @@ def model_method(data, **kwargs):
         switchpoint = pm.DiscreteUniform('switchpoint', lower=disaster_data['year'].min(), upper = disaster_data['year'].max(), testval=disaster_data['year'].median())
 
         early_rate = pm.Exponential('early_rate', m_kwars['early_rate_lambda'])
-        late_rastart_server('late_rate', m_kwars['late_rate_lambda'])
+        late_rate = pm.Exponential('late_rate', m_kwars['late_rate_lambda'])
 
         rate = pm.math.switch(switchpoint >= disaster_data['year'], early_rate, late_rate)
 

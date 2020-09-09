@@ -197,14 +197,14 @@ def plot_call_ppc(group, key, var, value, percent=100):
     
     @group should be either prior or posterior """
     color = value.color
-    if group == 'posterior':
+    if group == 'Posterior':
         data = value.posterior_predictive[percent]
     else:
         data = value.model_arviz_data
     kwg = dict(height=350, width=500)
     plot = az.plot_ppc(
         data, 
-        group=group, 
+        group=group.lower(), 
         var_names=var, 
         backend='bokeh',
         alpha=.5, 
@@ -214,9 +214,9 @@ def plot_call_ppc(group, key, var, value, percent=100):
         legend=True,
     )
     total = len(plot[0,0].renderers)-1
-    li1 = LegendItem(label='Posterior Predictive Samples', renderers=[plot[0,0].renderers[total-2]])
+    li1 = LegendItem(label=(group + ' Predictive Samples'), renderers=[plot[0,0].renderers[total-2]])
     li2 = LegendItem(label='Likelihood/Observed', renderers=[plot[0,0].renderers[total-1]])
-    li3 = LegendItem(label='Posterior Predictive Samples Mean', renderers=[plot[0,0].renderers[total]])
+    li3 = LegendItem(label=(group + ' Predictive Samples Mean'), renderers=[plot[0,0].renderers[total]])
     legend = Legend(items=[li1, li2, li3])
     legend.location = (10,-10)
     end_plot = plot[0][len(plot[0])-1]
@@ -244,7 +244,7 @@ def prior_predictive_density_plot(variable, data, plot='prior_predictive'):
     kwg = dict(height=350, width=500)
     x_axis_range, y_axis_range = [],[]
     for key, value in data.items():
-        plot = plot_call_ppc(group='prior', key=key, var=variable, value=value)
+        plot = plot_call_ppc(group='Prior', key=key, var=variable, value=value)
         plots.append(row(plot[0].tolist()))
     return plots
 
@@ -260,7 +260,7 @@ def posterior_predictive_density_plot(variable, data, percent, plot='posterior_p
     x_axis_range, y_axis_range = [],[]
     kwg = dict(height=350, width=500)
     for key, value in data.items():
-        plot = plot_call_ppc(group='posterior', key=key, var=variable, value=value, percent=percent)
+        plot = plot_call_ppc(group='Posterior', key=key, var=variable, value=value, percent=percent)
         plots.append(row(plot[0].tolist()))
     return plots
 
@@ -317,7 +317,7 @@ def compare_plot(data):
             )
     comp.replace([np.inf, -np.inf], np.nan)
     if comp.isnull().values.any():
-        return pn.widgets.StaticText(name='', val='Data contains missing values so can\'t compute WAIC')
+        return pn.widgets.StaticText(name='', value='Data contains missing values so can\'t compute WAIC')
     
     elif comp.shape[0] < 2:
         return pn.widgets.StaticText(name='', value='Add another configuration to compare models')
