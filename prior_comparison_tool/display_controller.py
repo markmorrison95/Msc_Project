@@ -92,10 +92,10 @@ class displayController:
     """class variables so that flag is mantained outside of method and the alert message can
         be easily removed from the display by removing from list by reference"""
     name_empty_flag = False
-    name_empty_alert = pn.widgets.StaticText(value='Add Prior Name before Submitting')
+    name_empty_alert = pn.widgets.StaticText(name='Warning',value='Add Prior Name before Submitting')
 
     sampling_failed_flag = False
-    sampling_failed_alert = pn.widgets.StaticText(value='Sampling failed, try another config')
+    sampling_failed_alert = pn.widgets.StaticText(name='Warning', value='Sampling failed, try another config')
     # ********************************************************************************************
 
 

@@ -7,6 +7,7 @@ import arviz as az
 import numpy as np
 from bokeh.models import LegendItem, Legend
 from bokeh.document import without_document_lock
+import copy
 
 def priors_same_plot_list(model_dict):
     data_list = []
@@ -221,7 +222,7 @@ def plot_call_ppc(group, key, var, value, percent=100):
     legend.location = (10,-10)
     end_plot = plot[0][len(plot[0])-1]
     end_plot.add_layout(legend, place='right')
-    end_plot.width = 800    
+    end_plot.width = 800
     for p in plot[0]:
         # setting the title of the plots so have the config name at the start
         # also changing the axis range so plots are linked at same range
@@ -242,9 +243,15 @@ def plot_call_ppc(group, key, var, value, percent=100):
 def prior_predictive_density_plot(variable, data, plot='prior_predictive'):
     plots = pn.Column(scroll=True, max_height=750, sizing_mode='stretch_both')
     kwg = dict(height=350, width=500)
-    x_axis_range, y_axis_range = [],[]
+    x_axis_range, y_axis_range = None, None
     for key, value in data.items():
         plot = plot_call_ppc(group='Prior', key=key, var=variable, value=value)
+        if x_axis_range is None:
+            x_axis_range = copy.deepcopy(plot[0,0].axis[0])
+            y_axis_range = copy.deepcopy(plot[0,0].axis[1]) 
+        for p in plot[0]:
+            p.axis[0] = x_axis_range
+            p.axis[1] = x_axis_range   
         plots.append(row(plot[0].tolist()))
     return plots
 
@@ -257,10 +264,16 @@ def prior_predictive_density_plot(variable, data, plot='prior_predictive'):
 @plot_cache
 def posterior_predictive_density_plot(variable, data, percent, plot='posterior_predictive',):
     plots = pn.Column(scroll=True, max_height=750, sizing_mode='stretch_both')
-    x_axis_range, y_axis_range = [],[]
+    x_axis_range, y_axis_range = None,None
     kwg = dict(height=350, width=500)
     for key, value in data.items():
         plot = plot_call_ppc(group='Posterior', key=key, var=variable, value=value, percent=percent)
+        if x_axis_range is None:
+            x_axis_range = copy.deepcopy(plot[0,0].axis[0])
+            y_axis_range = copy.deepcopy(plot[0,0].axis[1]) 
+        for p in plot[0]:
+            p.axis[0] = x_axis_range
+            p.axis[1] = y_axis_range  
         plots.append(row(plot[0].tolist()))
     return plots
 

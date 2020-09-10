@@ -16,10 +16,9 @@ def model_method(data, **prior_params):
         height = pm.Normal('height', mu=mu, sd=sigma, observed=data.height)
     return model
 
-d = pd.read_csv("Howell1.csv", sep=";", header=0)
-d = d[d.age >= 18]
-d["weight_std"] = (d.weight - d.weight.mean()) / d.weight.std()
-d["weight_std2"] = d.weight_std**2
+height_data = pd.read_csv("Howell1.csv", sep=";", header=0)
+height_data = height_data[height_data.age >= 18]
+height_data["weight_std"] = (height_data.weight - height_data.weight.mean()) / height_data.weight.std()
 
 
 params= {
@@ -31,6 +30,5 @@ params= {
     'sigma upper':50,
 }
 
-data = d
 
-create_app(model_method, data, **params)
+create_app(model_method, height_data, **params)

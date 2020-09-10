@@ -8,10 +8,11 @@ import time
 import sys
 
 done = False
-# animation for terminal output to say that the app is being created
-# reassures user that something is happening and there is not just a 
-# blank output
+
 def animate():
+    """animation for terminal output to say that the app is being created
+        reassures user that something is happening and there is not just a 
+        blank output"""
     for c in itertools.cycle(['|', '/', '-', '\\']):
         if done:
             break
