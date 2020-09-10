@@ -243,15 +243,19 @@ def plot_call_ppc(group, key, var, value, percent=100):
 def prior_predictive_density_plot(variable, data, plot='prior_predictive'):
     plots = pn.Column(scroll=True, max_height=750, sizing_mode='stretch_both')
     kwg = dict(height=350, width=500)
-    x_axis_range, y_axis_range = None, None
+    x_start, y_start = None, None
     for key, value in data.items():
         plot = plot_call_ppc(group='Prior', key=key, var=variable, value=value)
-        if x_axis_range is None:
-            x_axis_range = copy.deepcopy(plot[0,0].axis[0])
-            y_axis_range = copy.deepcopy(plot[0,0].axis[1]) 
+        if x_start == None:
+            x_start = plot[0,0].x_range.start
+            x_end = plot[0,0].x_range.end
+            y_start = plot[0,0].y_range.start
+            y_end = plot[0,0].y_range.end
         for p in plot[0]:
-            p.axis[0] = x_axis_range
-            p.axis[1] = x_axis_range   
+            p.x_range.start=  x_start
+            p.x_range.end = x_end
+            p.y_range.start= y_start
+            p.y_range.end =  y_end
         plots.append(row(plot[0].tolist()))
     return plots
 
@@ -268,12 +272,12 @@ def posterior_predictive_density_plot(variable, data, percent, plot='posterior_p
     kwg = dict(height=350, width=500)
     for key, value in data.items():
         plot = plot_call_ppc(group='Posterior', key=key, var=variable, value=value, percent=percent)
-        if x_axis_range is None:
-            x_axis_range = copy.deepcopy(plot[0,0].axis[0])
-            y_axis_range = copy.deepcopy(plot[0,0].axis[1]) 
-        for p in plot[0]:
-            p.axis[0] = x_axis_range
-            p.axis[1] = y_axis_range  
+        # if x_axis_range is None:
+        #     x_start,x_end = plot[0,0].x_range.start, plot[0,0].x_range.end
+        #     y_start,y_end = plot[0,0].y_range.start, plot[0,0].y_range.end
+        # for p in plot[0]:
+        #     p.x_range.start, p.x_range.end = x_start, x_end
+        #     p.y_range.start, p.y_range.end = y_start, y_end
         plots.append(row(plot[0].tolist()))
     return plots
 
