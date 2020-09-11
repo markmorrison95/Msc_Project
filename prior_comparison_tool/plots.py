@@ -10,18 +10,30 @@ from bokeh.document import without_document_lock
 import copy
 
 def priors_same_plot_list(model_dict):
+    """
+    creates a list of all the model data so that it can be plotted on the one figure
+    """
     data_list = []
     for model in model_dict.values():
         data_list.append(model.model_arviz_data)
     return data_list
 
 def posteriors_same_plot_list(model_dict, percent):
+    """
+    creates a list of all the model data so that it can be plotted on the one figure
+    does the same thing as prior but takes the percent into consideration 
+    """
     data_list = []
     for model in model_dict.values():
         data_list.append(model.posteriors[percent])
     return data_list
 
 def color_pool_gen(model_dict):
+    """
+    takes the dictionary of the model objects and creates a list of all the 
+    colors associated with them. In python dictionary order is mantained so
+    when creating the plots the colors will line up with the list
+    """
     colors = []
     for model in model_dict.values():
         colors.append(model.color)
@@ -138,6 +150,7 @@ def prior_density_plot(variable, data, plottype, plot='prior'):
             backend_kwargs=kwg,
             )
         for p in plot[0]:
+            # move legend to side of plot so its not obscuring any info
             legend = p.legend[0]
             legend.location = (10,-10)
             legend.orientation = "vertical"
@@ -181,6 +194,7 @@ def posterior_density_plot(variable, data, percent, plottype, plot='posterior'):
             backend_kwargs=kwg,
             )
         for p in plot[0]:
+            # move legend to side of plot so its not obscuring any info
             legend = p.legend[0]
             legend.location = (10,-10)
             legend.orientation = "vertical"
@@ -214,6 +228,10 @@ def plot_call_ppc(group, key, var, value, percent=100):
         num_pp_samples=250,
         legend=True,
     )
+    # for some reason the arviz function does not create a legend with the bokeh backend despite
+    # the feature being set as true. Therefore need to create a legend manually. 
+    # find the line types - first 4000 are all the MCMC samples so start from end and work backwards and the last 3 line types
+    # are the 3 being used. Create labels and then add to plot
     total = len(plot[0,0].renderers)-1
     li1 = LegendItem(label=(group + ' Predictive Samples'), renderers=[plot[0,0].renderers[total-2]])
     li2 = LegendItem(label='Likelihood/Observed', renderers=[plot[0,0].renderers[total-1]])
@@ -241,21 +259,23 @@ def plot_call_ppc(group, key, var, value, percent=100):
 @without_document_lock
 @plot_cache
 def prior_predictive_density_plot(variable, data, plot='prior_predictive'):
+    """
+    created the prior predictive plot, outsources the plotting to call to plot_call_ppc so that
+    individual plots can be cached. Also allows for the same plotting method to be used for 
+    posterior and prior ppc.
+    """
     plots = pn.Column(scroll=True, max_height=750, sizing_mode='stretch_both')
     kwg = dict(height=350, width=500)
-    x_start, y_start = None, None
+    x, y = None, None
     for key, value in data.items():
         plot = plot_call_ppc(group='Prior', key=key, var=variable, value=value)
-        if x_start == None:
-            x_start = plot[0,0].x_range.start
-            x_end = plot[0,0].x_range.end
-            y_start = plot[0,0].y_range.start
-            y_end = plot[0,0].y_range.end
+        # **** detects the first plots axis and then locks all the other plots to the same axis
+        if x == None:
+            x = plot[0,0].x_range
+            y = plot[0,0].y_range
         for p in plot[0]:
-            p.x_range.start=  x_start
-            p.x_range.end = x_end
-            p.y_range.start= y_start
-            p.y_range.end =  y_end
+            p.x_range =  x
+            p.y_range = y
         plots.append(row(plot[0].tolist()))
     return plots
 
@@ -267,17 +287,21 @@ def prior_predictive_density_plot(variable, data, plot='prior_predictive'):
 @without_document_lock
 @plot_cache
 def posterior_predictive_density_plot(variable, data, percent, plot='posterior_predictive',):
+    """
+    similar function to the prior ppc but also handles changes in perecentages to be displayed
+    """
     plots = pn.Column(scroll=True, max_height=750, sizing_mode='stretch_both')
-    x_axis_range, y_axis_range = None,None
+    x, y = None,None
     kwg = dict(height=350, width=500)
     for key, value in data.items():
         plot = plot_call_ppc(group='Posterior', key=key, var=variable, value=value, percent=percent)
-        # if x_axis_range is None:
-        #     x_start,x_end = plot[0,0].x_range.start, plot[0,0].x_range.end
-        #     y_start,y_end = plot[0,0].y_range.start, plot[0,0].y_range.end
-        # for p in plot[0]:
-        #     p.x_range.start, p.x_range.end = x_start, x_end
-        #     p.y_range.start, p.y_range.end = y_start, y_end
+        # locking axis to the first plot so that all values are easily comparable
+        if x == None:
+            x = plot[0,0].x_range
+            y = plot[0,0].y_range
+        for p in plot[0]:
+            p.x_range =  x
+            p.y_range = y
         plots.append(row(plot[0].tolist()))
     return plots
 
@@ -304,7 +328,6 @@ def plot_call_trace(group, key, var, value):
         )
     for p in plot[0]:
         # setting the title of the plots so have the config name at the start
-        # also changing the axis range so plots are linked at same range
         p.title.text = key+' '+p.title.text 
         if p.legend:
             p.legend.visible = False
@@ -315,6 +338,10 @@ def plot_call_trace(group, key, var, value):
 @without_document_lock
 @plot_cache
 def sample_trace_plot(variable, data, plot='sample_trace'):
+    """
+    plots the MCMC trace plot. Outsources plot call to another method to allow for
+    individual plot cacheing. Just creates plots and then groups together
+    """
     plots = pn.Column(scroll=True, max_height=750, sizing_mode='stretch_both')
     kwg = dict(height=200)
     x_axis_range, y_axis_range = [],[]
@@ -324,6 +351,12 @@ def sample_trace_plot(variable, data, plot='sample_trace'):
     return plots
 
 def compare_plot(data):
+    """
+    functions for creating the WAIC compare plot function. Creates data for WAIC here using the 
+    dictionary of models provided. Plot doesn't need to be dynamically redrawn with interactive 
+    functions so latency is not really an issue. Which is why its easier just to create the WAIC
+    data here. Plot only redrawn each time a new model is added.
+    """
     model_data = {}
     for key, value in data.items():
         model_data[key] = value.model_arviz_data
@@ -334,9 +367,14 @@ def compare_plot(data):
             )
     comp.replace([np.inf, -np.inf], np.nan)
     if comp.isnull().values.any():
+        # if null values present then - in the cases ive seen - it means the model is using data
+        # with missing values. Therefore notify the user that this feature is not available.
         return pn.widgets.StaticText(name='', value='Data contains missing values so can\'t compute WAIC')
     
     elif comp.shape[0] < 2:
+        # for some reason this plot creates an error tha will stop the whole app from loading 
+        # if only one model is plotted. Therefore notify the user that a second configuration 
+        # is required before this feature is enabled.
         return pn.widgets.StaticText(name='', value='Add another configuration to compare models')
 
     else:
@@ -348,6 +386,8 @@ def compare_plot(data):
                 backend_kwargs=kwg,
                 order_by_rank=True,
                 )
+        # plot does not generate a legend automatically so create one manually here by capturing the
+        # plot features and giving them labels
         li1 = LegendItem(label='WAIC', renderers=[plot.renderers[2]])
         li2 = LegendItem(label='Stadard Error', renderers=[plot.renderers[3]])
         li3 = LegendItem(label='In-Sample Deviance', renderers=[plot.renderers[4]])

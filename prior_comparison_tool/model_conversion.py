@@ -60,6 +60,26 @@ def convert_posterior_model(model):
 
 
 
+
+def data_reduce_cache(func):
+    """
+    caching the call to reduce the data so that the same reduced data set is 
+    used for all models. Could have stored the data somewhere else but made the change at end
+    and wanted to fix the issue without changing the rest of the program
+    """
+    cache = {}
+    def wrapped(**kwargs):
+        args = kwargs['fraction']
+        if args in cache:
+            return cache[args]
+        else:
+            val = func(**kwargs)
+            cache[args] = val
+            return val
+    return wrapped
+
+
+@data_reduce_cache
 def reduce_data_remove(data, fraction):
     """
     Reduces data by selecting random rows in the DataFrame and removing them entirely.

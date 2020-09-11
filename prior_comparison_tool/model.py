@@ -22,7 +22,7 @@ class model:
         self.posterior_predictive[100] = self.model_arviz_data
         for f in data_percentages:
             # loop generating the data for the varying percentages required
-            p = mc.convert_posterior_model(model(data=mc.reduce_data_remove(data, f/100), **model_kwargs))
+            p = mc.convert_posterior_model(model(data=mc.reduce_data_remove(data=data, fraction=f/100), **model_kwargs))
             # when plotting the posterior on the same plot the data needs to joined with the other models to create a 
             # pooled data set. Seems to be faster when the data is already pulled out here. Posterior predictive plot 
             # is only plotted seperately so doesn't have the same issue but does need to posterior data as well
