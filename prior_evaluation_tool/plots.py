@@ -8,6 +8,10 @@ import numpy as np
 from bokeh.models import LegendItem, Legend
 from bokeh.document import without_document_lock
 import copy
+import logging
+
+logger = logging.getLogger('arviz')
+logger.setLevel(logging.ERROR)
 
 def priors_same_plot_list(model_dict):
     """

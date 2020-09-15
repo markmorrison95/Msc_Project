@@ -1,5 +1,5 @@
 import param
-from prior_comparison_tool.plots import prior_density_plot, posterior_density_plot, prior_predictive_density_plot, posterior_predictive_density_plot, sample_trace_plot, compare_plot
+from prior_evaluation_tool.plots import prior_density_plot, posterior_density_plot, prior_predictive_density_plot, posterior_predictive_density_plot, sample_trace_plot, compare_plot
 import panel as pn
 from tornado import gen
 from bokeh.plotting import curdoc

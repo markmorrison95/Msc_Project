@@ -1,4 +1,4 @@
-import prior_comparison_tool.model_conversion as mc
+import prior_evaluation_tool.model_conversion as mc
 from bokeh.palettes import Category10
 import itertools
 

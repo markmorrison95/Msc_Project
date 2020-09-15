@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 import numpy as np
-from prior_comparison_tool.model_conversion import reduce_data_remove, convert_full_model, convert_posterior_model
+from prior_evaluation_tool.model_conversion import reduce_data_remove, convert_full_model, convert_posterior_model
 import pymc3 as pm
 
 RANDOM_SEED = 8927

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pymc3 as pm
 import pandas as pd
-from prior_comparison_tool.main import create_app
+from prior_evaluation_tool.main import create_app
 
 
 size = 200

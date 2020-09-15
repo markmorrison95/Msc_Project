@@ -1,8 +1,8 @@
 import pymc3 as pm
 from prior_comparison_tool.main import create_app
 import pandas as pd
-from prior_comparison_tool.model import model
-from prior_comparison_tool.plots import prior_density_plot, posterior_density_plot, posterior_predictive_density_plot, prior_predictive_density_plot, sample_trace_plot
+from prior_evaluation_tool.model import model
+from prior_evaluation_tool.plots import prior_density_plot, posterior_density_plot, posterior_predictive_density_plot, prior_predictive_density_plot, sample_trace_plot
 import unittest
 import timeit
 import numpy as np

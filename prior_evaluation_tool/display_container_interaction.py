@@ -1,5 +1,5 @@
-from prior_comparison_tool.model_container import modelContainer
-from prior_comparison_tool.display_controller import displayController
+from prior_evaluation_tool.model_container import modelContainer
+from prior_evaluation_tool.display_controller import displayController
 from pymc3.exceptions import SamplingError
 
 

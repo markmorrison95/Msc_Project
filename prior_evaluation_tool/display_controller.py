@@ -1,11 +1,10 @@
-from prior_comparison_tool.dashboards import priorDashboard, posteriorDashboard, sampleTraceDashboard, priorPredictiveDashboard, posteriorPredictiveDashboard, waicCompareDashboard
+from prior_evaluation_tool.dashboards import priorDashboard, posteriorDashboard, sampleTraceDashboard, priorPredictiveDashboard, posteriorPredictiveDashboard, waicCompareDashboard
 from tornado.ioloop import IOLoop
 import panel as pn
 import param
 import nest_asyncio
 import functools
 import webbrowser
-from prior_comparison_tool.model_container import modelContainer
 from threading import Thread
 
 
@@ -18,7 +17,7 @@ class displayController:
         @interaction_controller = display_container_interaction object
         @models = modelContainer object. Contains all model data for the app
          """
-    def __init__(self, interaction_controller, models: modelContainer):
+    def __init__(self, interaction_controller, models):
         self.controls = interaction_controller
         self.models = models
         """

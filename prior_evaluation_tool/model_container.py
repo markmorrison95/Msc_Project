@@ -1,4 +1,4 @@
-from prior_comparison_tool.model import model
+from prior_evaluation_tool.model import model
 import arviz as az
 
 class modelContainer:

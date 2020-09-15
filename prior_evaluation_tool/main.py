@@ -1,6 +1,6 @@
-from prior_comparison_tool.model import model
-from prior_comparison_tool.model_container import modelContainer
-from prior_comparison_tool.display_container_interaction import displayContainerInteraction
+from prior_evaluation_tool.model import model
+from prior_evaluation_tool.model_container import modelContainer
+from prior_evaluation_tool.display_container_interaction import displayContainerInteraction
 import pandas as pd
 import itertools
 import threading
