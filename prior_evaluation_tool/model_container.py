@@ -19,7 +19,10 @@ class modelContainer:
             model=self.original_model.model_function, 
             data=self.model_data, 
             model_kwargs=prior_args,
-            name=name
+            name=name,
+            num_samples_pymc3=self.original_model.num_samples_pymc3, 
+            InferenceData_coords=self.original_model.InferenceData_coords, 
+            InferenceData_dims=self.original_model.InferenceData_dims,
             )
         self.models_dict[name] = new_model
         return new_model

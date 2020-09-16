@@ -37,4 +37,8 @@ params= {
 }
 
 # single method call for instantiating the Prior Evaluation Tool
-create_app(model_method, height_data, **params)
+create_app(
+        model_method=model_method, 
+        data=height_data, 
+        prior_kwargs=params
+        )

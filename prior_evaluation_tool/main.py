@@ -24,13 +24,21 @@ def animate():
 
 
 
-def create_app(model_method, data, **prior_kwargs):
+def create_app(model_method, data, prior_kwargs:dict, InferenceData_dims={}, InferenceData_coords={}, num_samples_pymc3=1000):
     if not isinstance(data, pd.DataFrame or isinstance(data, pd.Series)):
         raise TypeError("Only Pandas DataFrame or Series allowed")
     else:
         thread = threading.Thread(target=animate)
         thread.start()
-        start_model = model(model_method, data, prior_kwargs, name='Original')
+        start_model = model(
+            model=model_method, 
+            data=data, 
+            model_kwargs=prior_kwargs, 
+            name='Original',
+            InferenceData_dims=InferenceData_dims,
+            InferenceData_coords=InferenceData_coords,
+            num_samples_pymc3=num_samples_pymc3,
+            )
         controls = displayContainerInteraction(start_model)
         global done
         done = True
