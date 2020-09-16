@@ -9,13 +9,13 @@ import logging
 logger = logging.getLogger('pymc3')
 logger.setLevel(logging.ERROR)
 
-def convert_full_model(model):
+def convert_full_model(model, num_samples, InferenceData_dims, InferenceData_coords):
     """
     Runs MCMC sampling on model provided and creates data for prior, posterior and PPC
     packages data into ArviZ InferenceData object and returns that
     """
     with model:
-        trace = pm.sample(progressbar=False)
+        trace = pm.sample(progressbar=False,draws=num_samples)
         prior = pm.sample_prior_predictive()
         posterior = pm.sample_posterior_predictive(trace,progressbar=False)
         """********************************************************
@@ -28,21 +28,38 @@ def convert_full_model(model):
         for key, val in posterior.items():
             posterior[key] = val.astype('float64')
         """*******************************************************"""
-        data = az.from_pymc3(
+        if InferenceData_dims != {} and InferenceData_coords != {}:
+            try:
+                data = az.from_pymc3(
+                            trace=trace,
+                            prior=prior,
+                            posterior_predictive=posterior,
+                            dims=InferenceData_dims,
+                            coords=InferenceData_coords,
+                        )
+            except:
+                data = az.from_pymc3(
                     trace=trace,
                     prior=prior,
                     posterior_predictive=posterior,
-                )
+                    )
+
+        else:
+            data = az.from_pymc3(
+                    trace=trace,
+                    prior=prior,
+                    posterior_predictive=posterior,
+                    )
     return data
 
-def convert_posterior_model(model):
+def convert_posterior_model(model, num_samples, InferenceData_dims, InferenceData_coords):
     """
     Runs MCMC sampling on model provided and creates data for posterior and PPC
     Does not produce prior data because not required
     packages data into ArviZ InferenceData object and returns that
     """
     with model:
-        trace = pm.sample(progressbar=False)
+        trace = pm.sample(progressbar=False, draws=num_samples)
         posterior = pm.sample_posterior_predictive(trace,progressbar=False)
         """********************************************************
             Forcing the output values from the model to be
@@ -52,10 +69,25 @@ def convert_posterior_model(model):
         for key, val in posterior.items():
             posterior[key] = val.astype('float64')
         """*******************************************************"""
-        data = az.from_pymc3(
+        if InferenceData_dims != {} and InferenceData_coords != {}:
+            try:
+                data = az.from_pymc3(
+                            trace=trace,
+                            posterior_predictive=posterior,
+                            dims=InferenceData_dims,
+                            coords=InferenceData_coords,
+                        )
+            except ValueError:
+                data = az.from_pymc3(
                     trace=trace,
                     posterior_predictive=posterior,
-                )
+                    )
+
+        else:
+            data = az.from_pymc3(
+                    trace=trace,
+                    posterior_predictive=posterior,
+                    )
     return data
 
 
@@ -65,7 +97,7 @@ def data_reduce_cache(func):
     """
     caching the call to reduce the data so that the same reduced data set is 
     used for all models. Could have stored the data somewhere else but made the change at end
-    and wanted to fix the issue without changing the rest of the program
+    and wanted to fix the issue without changing the other parts of the program
     """
     cache = {}
     def wrapped(**kwargs):
