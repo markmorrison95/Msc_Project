@@ -94,7 +94,7 @@ class displayController:
     name_empty_alert = pn.widgets.StaticText(name='Warning',value='Add Prior Name before Submitting')
 
     sampling_failed_flag = False
-    sampling_failed_alert = pn.widgets.StaticText(name='Warning', value='Sampling failed, try another config')
+    sampling_failed_alert = pn.widgets.StaticText(name='Warning', value='Sampling failed, Try Another Config')
     # ********************************************************************************************
 
 
