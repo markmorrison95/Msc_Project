@@ -234,7 +234,7 @@ def plot_call_ppc(group, key, var, value, percent=100):
     )
     # for some reason the arviz function does not create a legend with the bokeh backend despite
     # the feature being set as true. Therefore need to create a legend manually. 
-    # find the line types - first 4000 are all the MCMC samples so start from end and work backwards and the last 3 line types
+    # find the line types -  all lines apart from last 2 are the MCMC samples so start from end and work backwards and the last 3 line types
     # are the 3 being used. Create labels and then add to plot
     total = len(plot[0,0].renderers)-1
     li1 = LegendItem(label=(group + ' Predictive Samples'), renderers=[plot[0,0].renderers[total-2]])
@@ -247,7 +247,6 @@ def plot_call_ppc(group, key, var, value, percent=100):
     end_plot.width = 800
     for p in plot[0]:
         # setting the title of the plots so have the config name at the start
-        # also changing the axis range so plots are linked at same range
         p.title.text = key+' '+p.title.text 
     return plot
 # ************************************************************************************
