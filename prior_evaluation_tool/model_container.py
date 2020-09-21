@@ -2,6 +2,14 @@ from prior_evaluation_tool.model import model
 import arviz as az
 
 class modelContainer:
+    """
+    Object designed around storing "model" objects
+
+    requires a model for instantiation which will be assigned the name "Original"
+    this name will be used to key it in the dict
+
+    provides method for adding a new model with just the name and new prior parameters
+    """
     def __init__(self, model:model):
         self.original_model = model
         self.models_dict = {model.name:model}
@@ -15,6 +23,8 @@ class modelContainer:
             temp_name = name + '('+ str(i) + ')'
             i+=1
         name = temp_name
+        # creates a new model object by pulling the method and data from the original model
+        # and then uses the prior params and name of the new model
         new_model = model(
             model=self.original_model.model_function, 
             data=self.model_data, 
@@ -38,13 +48,3 @@ class modelContainer:
 
     def posterior_variables(self):
         return self.original_model.posterior_variables()
-
-    def compare_waic(self):
-        model_data = {}
-        for key, value in self.models_dict.items():
-            model_data[key] = value.model_arviz_data
-        comp = az.compare(
-            model_data, 
-            ic='waic'
-            )
-        return comp

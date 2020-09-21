@@ -12,6 +12,24 @@ colors = color_gen()
 data_percentages = [90, 80,70, 60, 50, 40, 30, 20,10]
 
 class model:
+    """
+    object for storing all the model related data
+
+    @params
+    model = the model method for creation 
+    data = pandas series of dataframe for model
+    InferenceData_dims = arviz dims dict
+    InferenceData_coords = arviz coords dict
+    num_samples_pymc3 = number of samples for MCMC sampling with pymc3
+    model_kwargs = dict of the prior paramters for the model methods
+    name = configuration name
+    
+
+    one instantiation will fit the model and create the inference data
+    inference data for the @data_percentages will be stored in a dict for the posterior & pp samples
+
+    all sampling is outsourced to model conversion
+    """
     def __init__(self, model, data, InferenceData_dims,InferenceData_coords, num_samples_pymc3, model_kwargs:dict, name='prior'):
         self.name = name
         self.color = next(colors)
@@ -47,7 +65,15 @@ class model:
             # seperately when so as to improve plot creation speed slightly
             self.posteriors[f] = p.posterior
             self.posterior_predictive[f] = p
+
+
+
+
+
+   
         
+    # ******* methods creating a list of the variables of type function name **************
+    # used for creating the drop down variable selectors in the dashboards
     def prior_variables(self):
         return list(self.model_arviz_data.prior.data_vars)
 
@@ -59,3 +85,4 @@ class model:
 
     def posterior_predictive_variables(self):
         return list(self.model_arviz_data.posterior_predictive.data_vars)
+    # ***************************************************************************************

@@ -5,10 +5,13 @@ from pymc3.exceptions import SamplingError
 
 class displayContainerInteraction:
     """
+    Used for a go between for the display_controller and model_container
+    
     allows for callback to display_controller when adding a new model config 
     while avoiding circular inputs
-    """
 
+    probably not the ideal solution but saved time with refactoring 
+    """
     def __init__(self, model):
         self.models = modelContainer(model)
         self.app = displayController(interaction_controller=self, models=self.models)

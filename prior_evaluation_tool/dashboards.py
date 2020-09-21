@@ -9,6 +9,15 @@ inputs = ['Separate Plots','Same Plot' ]
 
 
 class priorDashboard(param.Parameterized):
+    """
+    Dashboard for the prior view
+
+    data should be dictionary of model objects
+    and should be set on instantiation along with the name
+    variable needs to be set with the prior variables list after instantiation
+
+    returns a panel row with the parameter controls and the plots
+    """
     # precedence less than one means it is not a user displayed option. Set through initial params passed
     data = param.Dict(precedence=-1)
     variable = param.Selector(None)
@@ -23,6 +32,15 @@ class priorDashboard(param.Parameterized):
 
 
 class priorPredictiveDashboard(param.Parameterized):
+    """
+    Dashboard for the prior predictive view
+
+    data should be dictionary of model objects
+    and should be set on instantiation along with the name
+    variable needs to be set with the posterior variables list after instantiation
+
+    returns a panel row with the parameter controls and the plots
+    """
     data = param.Dict(precedence=-1)
     variable = param.Selector(None)
 
@@ -35,6 +53,15 @@ class priorPredictiveDashboard(param.Parameterized):
 
 
 class posteriorDashboard(param.Parameterized):
+    """
+    Dashboard for the posterior view
+
+    data should be dictionary of model objects
+    and should be set on instantiation along with the name
+    variable needs to be set with the posterior variables list after instantiation
+
+    returns a panel row with the parameter controls and the plots
+    """
     data = param.Dict(precedence=-1)
     variable = param.Selector(None)
     plot_type = param.Selector(inputs, default=inputs[0], doc='Type of Plot:')
@@ -50,6 +77,15 @@ class posteriorDashboard(param.Parameterized):
 
 
 class posteriorPredictiveDashboard(param.Parameterized):
+    """
+    Dashboard for the posterior predictive view
+
+    data should be dictionary of model objects
+    and should be set on instantiation along with the name
+    variable needs to be set with the posterior variables list after instantiation
+
+    returns a panel row with the parameter controls and the plots
+    """
     data = param.Dict(precedence=-1)
     variable = param.Selector(None)
     percentage = param.Number(default=100, bounds=(10,100), step=10, doc='Percentage of Data:')
@@ -63,6 +99,15 @@ class posteriorPredictiveDashboard(param.Parameterized):
 
 
 class sampleTraceDashboard(param.Parameterized):
+    """
+    Dashboard for the MCMC trace view
+
+    data should be dictionary of model objects
+    and should be set on instantiation along with the name
+    variable needs to be set with the posterior variables list after instantiation
+
+    returns a panel row with the parameter controls and the plots
+    """
     data = param.Dict(precedence=-1)
     variable = param.Selector(None)
 
@@ -74,6 +119,15 @@ class sampleTraceDashboard(param.Parameterized):
         return pn.Row(self.param, self.plot, sizing_mode='scale_both')
 
 class waicCompareDashboard(param.Parameterized):
+    """
+    Dashboard for the WAIC trace view
+
+    data should be dictionary of model objects
+    and should be set on instantiation along with the name
+    variable needs to be set with the posterior variables list after instantiation
+
+    returns a panel row with the parameter controls and the plots
+    """
     data = param.Dict(precedence=-1)
 
     @param.depends('data')

@@ -42,4 +42,8 @@ prior_params = {
     'x sigma':20,
 }
 
-create_app(model_method, data, **prior_params)
+create_app(
+        model_method=model_method, 
+        data=data, 
+        prior_kwargs=prior_params,
+        )

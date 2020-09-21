@@ -61,32 +61,32 @@ class testModelConversion(unittest.TestCase):
     """
     Class for testing hte methods from the modelConversion class. Ensures data is being created as expected
     as well as checking for consistency accross different config inputs
-    """
-
-    def test_data_removal_wrong_type(self):
-        """ Tests trying to remove data from numpy array, shouldn't be allowed
-        """
-        with self.assertRaises(TypeError):
-            reduce_data_remove(Y)
-
-
+    """ 
     def test_data_removal_panda_series(self):
         """ Test that correct amount of data is being removed when using pandas series
         """
-        reduced_data = reduce_data_remove(data_series,.5)
+        reduced_data = reduce_data_remove(data=data_series,fraction=.5)
         self.assertAlmostEqual(len(reduced_data), (len(data_series)*.5))
 
 
     def test_data_removal_panda_DataFrame(self):
         """ Test that correct amount of data is being removed when using pandas DataFrame
         """
-        reduced_data = reduce_data_remove(data,.5)
+        reduced_data = reduce_data_remove(data=data,fraction=.5)
         self.assertAlmostEqual(len(reduced_data), (len(data)*.5))
 
     model1 = model_method(data, **params)
     model2 = model_method(data, **params2)
-    data1 = convert_full_model(model1)
-    data2 = convert_full_model(model2)
+    data1 = convert_full_model(
+            model=model1,
+            num_samples=1000,
+            InferenceData_coords={},
+            InferenceData_dims={})
+    data2 = convert_full_model(model2,
+            num_samples=1000,
+            InferenceData_coords={},
+            InferenceData_dims={},
+        )
 
     def test_sample_size_consistency(self):
         """ Test to ensure consistent MCMC sampling size across different model configs

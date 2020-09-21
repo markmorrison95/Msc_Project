@@ -1,5 +1,5 @@
 import pymc3 as pm
-from prior_comparison_tool.main import create_app
+from prior_evaluation_tool.main import create_app
 import pandas as pd
 from prior_evaluation_tool.model import model
 from prior_evaluation_tool.plots import prior_density_plot, posterior_density_plot, posterior_predictive_density_plot, prior_predictive_density_plot, sample_trace_plot
@@ -7,7 +7,7 @@ import unittest
 import timeit
 import numpy as np
 
-# python -m unittest discover <test_directory>
+# To run in Commandline enter: python -m unittest discover tests
 
 RANDOM_SEED = 8927
 np.random.seed(RANDOM_SEED)
@@ -71,8 +71,20 @@ class testCacheingAlgorithms(unittest.TestCase):
     
     """
     print('building test models')
-    model1 = model(model=model_method, data = data, model_kwargs=params)
-    model2 = model(model=model_method, data = data, model_kwargs=params2)
+    model1 = model(model=model_method, 
+                    data = data, 
+                    model_kwargs=params, 
+                    InferenceData_coords={}, 
+                    InferenceData_dims={},
+                    num_samples_pymc3=1000,
+                    )
+    model2 = model(model=model_method, 
+                    data = data, 
+                    model_kwargs=params2,
+                    InferenceData_coords={}, 
+                    InferenceData_dims={},
+                    num_samples_pymc3=1000,
+                    )
     test_dict_one_model = {'model1':model1}
     test_dict_two_models = {'model1':model1, 'model2':model2}
 
