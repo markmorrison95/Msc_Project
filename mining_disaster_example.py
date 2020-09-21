@@ -32,4 +32,8 @@ def model_method(data, **kwargs):
     return disaster_model
 
 
-create_app(model_method, disaster_data, **m_kwars)
+create_app(
+        model_method=model_method, 
+        data=disaster_data, 
+        prior_kwargs=m_kwars,
+        )
